@@ -1,0 +1,6 @@
+TF	cell_type	sample_name	experiment_accession	conserved_peak_file	relaxed_peak_file	assay_type	genome_assembly
+JUN	A549	ChIP.JUN.A549	ENCSR996DUT	https://www.encodeproject.org/files/ENCFF775ODT/@@download/ENCFF775ODT.bed.gz	https://www.encodeproject.org/files/ENCFF708LCH/@@download/ENCFF708LCH.bed.gz	ChIP	hg19
+JUNB	K562	ChIP.JUNB.K562	ENCSR795IYP	https://www.encodeproject.org/files/ENCFF209OUI/@@download/ENCFF209OUI.bed.gz	https://www.encodeproject.org/files/ENCFF426DUB/@@download/ENCFF426DUB.bed.gz	ChIP	hg19
+JUND	A549	ChIP.JUND.A549	ENCSR000BRF	https://www.encodeproject.org/files/ENCFF645SYX/@@download/ENCFF645SYX.bed.gz	https://www.encodeproject.org/files/ENCFF499OUD/@@download/ENCFF499OUD.bed.gz	ChIP	hg19
+JUND	GM12878	ChIP.JUND.GM12878	ENCSR000DYS	https://www.encodeproject.org/files/ENCFF321KTX/@@download/ENCFF321KTX.bed.gz	https://www.encodeproject.org/files/ENCFF556PIY/@@download/ENCFF556PIY.bed.gz	ChIP	hg19
+JUND	K562	ChIP.JUND.K562	ENCSR000EGN	https://www.encodeproject.org/files/ENCFF774OPQ/@@download/ENCFF774OPQ.bed.gz	https://www.encodeproject.org/files/ENCFF337DKJ/@@download/ENCFF337DKJ.bed.gz	ChIP	hg19
