@@ -15,7 +15,7 @@ data/metadata/training_example/
 |-- in_ENCODE_hocomoco.txt
 |-- out_ENCODE_TF_ChIP.txt
 |-- test_regions.bed
-|-- train_regions.bed
+|-- training_regions.bed
 `-- validation_regions.bed
 data/embeddings/
 `-- example.pkl
@@ -41,7 +41,7 @@ The above procedure can be achieved by running the following:
 ```
 cd preprocess
 ./preprocess_v1-1_generate_example_sequences.sh \
---region_bed ../data/metadata/training_example/train_regions.bed,../data/metadata/training_example/validation_regions.bed,../data/metadata/training_example/test_regions.bed --output_prefix train,validation,test \
+--region_bed ../data/metadata/training_example/training_regions.bed,../data/metadata/training_example/validation_regions.bed,../data/metadata/training_example/test_regions.bed --output_prefix training,validation,test \
 --output_dir ../data/datasets/training_example
 ```
 The main goal of this step is to create an example `.pkl` file necessary for the downstream data collection steps. It specifies the genomic locations of each example sequence, and where the retrieved feature signal track and target labels will be saved.
@@ -50,9 +50,9 @@ Alternatively, you can provide your own peak set stored in the [bed file format]
 
 
 ### Step 2: retrieve feature signal tracks and target labels
-For each dataset (train, validation and test), we need to retrieve feature signals (DNase-seq signal and HOCOMOCO motif enrichment) as well as target labels (from conserved and relaxed peak sets). `preprocess_v1-2_retrieve_signal.sh` retrieves necessary data and performs zscore normalization on the retrieved feature signals. For small datasets, we can do this sequentially by running the following: 
+For each dataset (training, validation and test), we need to retrieve feature signals (DNase-seq signal and HOCOMOCO motif enrichment) as well as target labels (from conserved and relaxed peak sets). `preprocess_v1-2_retrieve_signal.sh` retrieves necessary data and performs zscore normalization on the retrieved feature signals. For small datasets, we can do this sequentially by running the following: 
 ```
-declare -a datasets=("train" "validation" "test")
+declare -a datasets=("training" "validation" "test")
 for dset in "${datasets[@]}"; do
 	EXAMPLE_PICKLE="../data/datasets/training_example/${dset}/${dset}_minOverlap200_maxUnion600_example.pkl"
 	REGION_BED="../data/metadata/training_example/${dset}_regions.bed"
@@ -90,7 +90,7 @@ done
 ```
 I recommend running this step on a high performance computing environment if you have a large number of example sequences and conditions to get data from. If you're working under [Slurm](https://slurm.schedmd.com/), you can submit array jobs similar to this:
 ```
-declare -a datasets=("train" "validation" "test")
+declare -a datasets=("training" "validation" "test")
 for dset in "${datasets[@]}"; do
 	EXAMPLE_PICKLE="../data/datasets/training_example/${dset}/${dset}_minOverlap200_maxUnion600_example.pkl"
 	REGION_BED="../data/metadata/training_example/${dset}_regions.bed"
@@ -122,7 +122,7 @@ done
 ### Step 3: generate hdf5 data files
 The last step is to combine the retrieved feature signals as well as target labels into one [HDF5 file](https://www.hdfgroup.org/solutions/hdf5/).
 ```
-declare -a datasets=("train" "validation" "test")
+declare -a datasets=("training" "validation" "test")
 for dset in "${datasets[@]}"; do
 	EXAMPLE_PICKLE="../data/datasets/training_example/${dset}/${dset}_minOverlap200_maxUnion600_example.pkl"
 	OUTPUT_HDF5="../data/datasets/training_example/${dset}_minOverlap200_maxUnion600_example.h5"
@@ -197,11 +197,5 @@ EXTRA_ARGS="--ct_feature,DNase,--tf_feature,hocomoco,--compression,--skip_target
 
 [Here](../data/datasets/prediction_example/prediction_example_directory_structure.md) is a list of files you will be able to generate after successfully running the above three steps.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbNzAyMzM2ODI1LDc4MjcxMzgxMywtMTY5Nz
-M5ODYzMSw3OTk3OTc3OTksODk0Mjg3NzAxLC0xMzg0MzE4MTAs
-OTk5NTA4NTA4LDIwNDYwNTU1MzEsMTY0MDkwODM1OSw4NDQyOT
-E5MzEsMzc0MjM3MTI0LDEyMDk4ODgxMCwxMzM3ODEyMTg4LDY5
-MTMwNDc2OSwxMjc3NjgzMjcsMjY2NzUxOTQ4LC0yMTI0NTUyNz
-EzLC0xMjUxNzgxNTU3LC05MjUzNTA3ODIsLTE5NjA5MzU1OTBd
-fQ==
+eyJoaXN0b3J5IjpbLTc0NjU3Njc0OSwtNzQ2NTc2NzQ5XX0=
 -->
