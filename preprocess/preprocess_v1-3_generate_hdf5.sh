@@ -8,14 +8,14 @@ Example usage:
 	[--generate_hdf5_extra_args GENERATE_HDF5_EXTRA_ARGS]
 
 Flags:
---example_pickle Path to example.pkl file. (Default: ../data/datasets/training_example/train/train_minOverlap200_maxUnion600_example.pkl)
---output_hdf5 Path to output hdf5 file.  (Default: ../data/datasets/training_example/train_minOverlap200_maxUnion600_example.h5)
+--example_pickle Path to example.pkl file. (Default: ../data/datasets/training_example/training/training_minOverlap200_maxUnion600_example.pkl)
+--output_hdf5 Path to output hdf5 file.  (Default: ../data/datasets/training_example/training_minOverlap200_maxUnion600_example.h5)
 --generate_hdf5_extra_args Flags for generate_hdf5.py, specified as "flag1,param1,flag2,param2,flag3". See available keyword arguments by running `python generate_hdf5.py -h`. (Default: --ct_feature,DNase,--tf_feature,hocomoco,--compression)
 '
 
 # Specify default values.
-EXAMPLE_PICKLE="../data/datasets/training_example/train/train_minOverlap200_maxUnion600_example.pkl"
-OUTPUT_HDF5="../data/datasets/training_example/train_minOverlap200_maxUnion600_example.h5"
+EXAMPLE_PICKLE="../data/datasets/training_example/training/training_minOverlap200_maxUnion600_example.pkl"
+OUTPUT_HDF5="../data/datasets/training_example/training_minOverlap200_maxUnion600_example.h5"
 GENERATE_HDF5_EXTRA_ARGS="--ct_feature,DNase,--tf_feature,hocomoco,--compression"
 
 while [ "$1" != "" ]; do

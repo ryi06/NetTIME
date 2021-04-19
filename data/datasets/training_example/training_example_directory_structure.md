@@ -30,7 +30,7 @@ data/datasets/training_example
 |   |-- test_minOverlap200_maxUnion600_example.bed
 |   |-- test_minOverlap200_maxUnion600_example.fa
 |   `-- test_minOverlap200_maxUnion600_example.pkl
-|-- train
+|-- training
 |   |-- feature
 |   |   |-- DNase.A549.0.npz
 |   |   |-- DNase.GM12878.0.npz
@@ -56,10 +56,10 @@ data/datasets/training_example
 |   |   |-- hocomoco.JUN.zscore_params.threshold1e-02.npz
 |   |   |-- hocomoco.JUNB.zscore_params.threshold1e-02.npz
 |   |   `-- hocomoco.JUND.zscore_params.threshold1e-02.npz
-|   |-- train_minOverlap200_maxUnion600.bed
-|   |-- train_minOverlap200_maxUnion600_example.bed
-|   |-- train_minOverlap200_maxUnion600_example.fa
-|   `-- train_minOverlap200_maxUnion600_example.pkl
+|   |-- training_minOverlap200_maxUnion600.bed
+|   |-- training_minOverlap200_maxUnion600_example.bed
+|   |-- training_minOverlap200_maxUnion600_example.fa
+|   `-- training_minOverlap200_maxUnion600_example.pkl
 |-- validation
 |   |-- feature
 |   |   |-- DNase.A549.0.npz
@@ -91,7 +91,9 @@ data/datasets/training_example
 |   |-- validation_minOverlap200_maxUnion600_example.fa
 |   `-- validation_minOverlap200_maxUnion600_example.pkl
 |-- test_minOverlap200_maxUnion600_example.h5
-|-- train_minOverlap200_maxUnion600_example.h5
 |-- training_example_directory_structure.md
+|-- training_minOverlap200_maxUnion600_example.h5
 `-- validation_minOverlap200_maxUnion600_example.h5
+
+12 directories, 82 files
 ```

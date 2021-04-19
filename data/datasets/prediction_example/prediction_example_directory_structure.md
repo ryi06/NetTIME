@@ -1,5 +1,5 @@
 ```
-data/datasets/prediction_example
+data/datasets/prediction_example/
 |-- feature
 |   |-- DNase.GM12878.0.npz
 |   |-- DNase.K562.0.npz
@@ -12,6 +12,9 @@ data/datasets/prediction_example
 |   `-- hocomoco.JUNB.zscore_params.threshold1e-02.npz
 |-- predict_example.bed
 |-- predict_example.fa
+|-- predict_example.h5
 |-- predict_example.pkl
 `-- prediction_example_directory_structure.md
+
+2 directories, 13 files
 ```
