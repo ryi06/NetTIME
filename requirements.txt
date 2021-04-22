@@ -1,0 +1,10 @@
+bedtools
+h5py
+meme
+numpy
+pandas
+pybedtools
+pytorch=1.8.1
+scikit-learn
+tqdm
+ucsc-bigwigtobedgraph
