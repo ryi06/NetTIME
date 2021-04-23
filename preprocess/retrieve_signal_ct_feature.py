@@ -151,4 +151,4 @@ zscore_file = os.path.join(
 )
 zscore_signal(signal_writer, original_data, zscore_file)
 
-print_time("All sample processed!", start_time)
+print_time("All samples processed!", start_time)

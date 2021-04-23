@@ -119,14 +119,14 @@ for dset in "${datasets[@]}"; do
 	--zscore_dir $ZSCORE_DIR --tmp_dir $SLURM_JOBTMP
 done
 ``` 
-### Step 3: generate hdf5 data files
-The last step is to combine the retrieved feature signals as well as target labels into one [HDF5 file](https://www.hdfgroup.org/solutions/hdf5/).
+### Step 3: Merge data files
+The last step is to combine the retrieved feature signals as well as target labels into one [HDF5 file](https://www.hdfgroup.org/solutions/hdf5/), and compute class weight in target labels. 
 ```
 declare -a datasets=("training" "validation" "test")
 for dset in "${datasets[@]}"; do
 	EXAMPLE_PICKLE="../data/datasets/training_example/${dset}/${dset}_minOverlap200_maxUnion600_example.pkl"
 	OUTPUT_HDF5="../data/datasets/training_example/${dset}_minOverlap200_maxUnion600_example.h5"
-	./preprocess_v1-3_generate_hdf5.sh --example_pickle $EXAMPLE_PICKLE \
+	./preprocess_v1-3_merge_dataset.sh --example_pickle $EXAMPLE_PICKLE \
 	--output_hdf5 $OUTPUT_HDF5
 done
 ```
@@ -185,17 +185,18 @@ for job_id in {2..3}; do
 done
 ```
 
-### Generate hdf5 data file
+### Merge data files
 Combine the retrieved feature signals into one [HDF5 file](https://www.hdfgroup.org/solutions/hdf5/). Turn on the `--skip_target` flag when target labels are not available.
 ```
 EXAMPLE_PICKLE="../data/datasets/prediction_example/predict_example.pkl"
 OUTPUT_HDF5="../data/datasets/prediction_example/predict_example.h5"
 EXTRA_ARGS="--ct_feature,DNase,--tf_feature,hocomoco,--compression,--skip_target,--condition_metadata,../data/metadata/prediction_example/conditions.txt"
-./preprocess_v1-3_generate_hdf5.sh --example_pickle $EXAMPLE_PICKLE \
+./preprocess_v1-3_merge_dataset.sh --example_pickle $EXAMPLE_PICKLE \
 --output_hdf5 $OUTPUT_HDF5 --generate_hdf5_extra_args $EXTRA_ARGS
 ```
 
 [Here](../data/datasets/prediction_example/prediction_example_directory_structure.md) is a list of files you will be able to generate after successfully running the above three steps.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTc0NjU3Njc0OSwtNzQ2NTc2NzQ5XX0=
+eyJoaXN0b3J5IjpbLTE3NTE5ODEyNDUsNzg0NTEyNzk5LC03ND
+Y1NzY3NDksLTc0NjU3Njc0OV19
 -->

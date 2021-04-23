@@ -10,7 +10,7 @@ from tqdm import tqdm
 from utils import FeatureReader, display_args, print_time
 
 parser = argparse.ArgumentParser(
-    "Get signal for input targets, including indices."
+    "Merge features signals (and targets labels) into an HDF5 file."
 )
 
 parser.add_argument("metadata_pkl", type=str, help="Path to example .pkl file.")
@@ -227,4 +227,4 @@ with h5py.File(args.output_h5, "w") as h5_file:
         add_target(seq_dict, h5_file, "output_conserved")
         add_target(seq_dict, h5_file, "output_relaxed")
 
-print_time("All sample processed!", START_TIME)
+print_time("All samples processed!", START_TIME)

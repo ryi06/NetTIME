@@ -91,9 +91,12 @@ data/datasets/training_example
 |   |-- validation_minOverlap200_maxUnion600_example.fa
 |   `-- validation_minOverlap200_maxUnion600_example.pkl
 |-- test_minOverlap200_maxUnion600_example.h5
+|-- test_minOverlap200_maxUnion600_example_weight.npy
 |-- training_example_directory_structure.md
 |-- training_minOverlap200_maxUnion600_example.h5
-`-- validation_minOverlap200_maxUnion600_example.h5
+|-- training_minOverlap200_maxUnion600_example_weight.npy
+|-- validation_minOverlap200_maxUnion600_example.h5
+`-- validation_minOverlap200_maxUnion600_example_weight.npy
 
-12 directories, 82 files
+12 directories, 85 files
 ```
