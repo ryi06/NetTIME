@@ -7,7 +7,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from .calculate_metrics import *
+from .calculate_metrics import ScoreTracker, avg_sample_loss
 from .dataset import MultiBPEDataset, collate_samples, push_to_device
 from .model import MultiBPE
 from .utils import *
@@ -53,11 +53,7 @@ class EvaluateWorkflow(object):
             self.dtype,
             overwrite=False,
         )
-        self.logger.info(
-            "CONFIG:\n{}".format(
-                json.dumps(vars(self.args), indent=4, sort_keys=True)
-            )
-        )
+        display_args(self.args, self.logger)
 
         # Set up GPUs
         if not torch.cuda.is_available():
@@ -69,7 +65,7 @@ class EvaluateWorkflow(object):
             "Use {} GPU(s) for evaluation".format(torch.cuda.device_count())
         )
 
-        # Initialize model
+        # Initialize model.
         self.load_model()
         self.criterion = nn.CrossEntropyLoss(reduction="none")
         self.logger.info("MODEL ARCHITECTURE:\n{}".format(self.model))
@@ -78,7 +74,7 @@ class EvaluateWorkflow(object):
         self.initialize_result_directories()
 
         # Start evaluation.
-        self.logger.info("Start evaluation......")
+        self.logger.info("Start evaluation.")
         try:
             self.evaluate_checkpoints()
             self.logger.info("Evaluation finished.")
@@ -153,7 +149,7 @@ class EvaluateWorkflow(object):
         # Initialize evaluation worker.
         evaluate_queue = mp.JoinableQueue(maxsize=64)
         evaluate_worker = mp.Process(
-            name="evaluate",
+            name="evaluate_{}".format(step),
             target=self.evaluate,
             args=(checkpoint, evaluate_queue, eval_path, step, num_batches),
         )
@@ -253,14 +249,13 @@ class EvaluateWorkflow(object):
                 "{}_{}".format(self.dtype.lower(), self.__MODE.lower()),
             )
         create_dirs(self.eval_path, logger=self.logger)
+        self.best_ckpt_path = os.path.join(self.eval_path, "best_checkpoint")
+        create_dirs(self.best_ckpt_path, logger=self.logger)
 
         if self.ckpt_dir is not None:
             self.ckpt_path = self.ckpt_dir
         else:
             self.ckpt_path = os.path.join(self.model_dir, "checkpoints")
-
-        self.best_ckpt_path = os.path.join(self.eval_path, "best_checkpoint")
-        create_dirs(self.best_ckpt_path, logger=self.logger)
 
     def update_best_ckpt(self, result, checkpoint, metric):
         """Update best checkpoint metrics."""

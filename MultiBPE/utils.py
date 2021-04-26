@@ -1,4 +1,5 @@
 import glob
+import json
 import logging
 import os
 import pickle
@@ -135,7 +136,7 @@ def create_dirs(directory, logger=None):
     """Create directory, display warning msg if directory already exists."""
     if os.path.exists(directory):
         msg = (
-            "Directory {} already exists. " "Information may be overwritten."
+            "Directory {} already exists. Information may be overwritten."
         ).format(directory)
     else:
         os.makedirs(directory)
@@ -148,8 +149,8 @@ def init_model_dir(output_dir, experiment_name):
     return os.path.join(output_dir, experiment_name)
 
 
-# def initialize_dtype(dtype, normalize):
-#     if normalize:
-#         return "{}_{}".format(dtype, "NORMALIZE")
-#     else:
-#         return "{}_{}".format(dtype, "LOGSOFTMAX")
+def display_args(args, logger):
+    """Display input argument."""
+    logger.info(
+        "CONFIG:\n{}".format(json.dumps(vars(args), indent=4, sort_keys=True))
+    )

@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-from .calculate_metrics import *
+from .calculate_metrics import ScoreTracker, avg_sample_loss
 from .dataset import MultiBPEDataset, collate_samples, push_to_device
 from .model import MultiBPE
 from .utils import *
@@ -63,11 +63,7 @@ class TrainWorkflow(object):
         self.logger = set_logger(
             self.model_dir, self.experiment_name, self.__MODE, self.dtype
         )
-        self.logger.info(
-            "CONFIG:\n{}".format(
-                json.dumps(vars(self.args), indent=4, sort_keys=True)
-            )
-        )
+        display_args(self.args, self.logger)
 
         # Set up GPUs
         if not torch.cuda.is_available():
@@ -80,7 +76,7 @@ class TrainWorkflow(object):
         )
 
         # Load data
-        self.logger.info("Loading data......")
+        self.logger.info("Loading data.")
         embed_indices = reverse_embedding(self.index_file)
         params = {
             "batch_size": self.batch_size,
@@ -116,7 +112,7 @@ class TrainWorkflow(object):
         self.model.to(self.device)
         self.logger.info("MODEL ARCHITECTURE:\n{}".format(self.model))
 
-        # Initialize pptimizer
+        # Initialize optimizer
         self.optimizer = optim.Adam(
             self.model.parameters(),
             lr=self.learning_rate,
@@ -130,7 +126,7 @@ class TrainWorkflow(object):
         self.initialize_result_directories()
 
         # Start training
-        self.logger.info("Start training......")
+        self.logger.info("Start training.")
         try:
             self.train()
             self.logger.info("Training finished.")
@@ -274,8 +270,8 @@ class TrainWorkflow(object):
     def display_loss(self, epoch, batch, N):
         """Display training loss."""
         self.logger.info(
-            "| epoch {:3d} | {:6d}/{:6d} batches "
-            "| avg loss {:8.4f} | time interval: {:>12} |".format(
+            "| epoch {:3d} | {:6d}/{:6d} batches | avg loss {:8.4f} "
+            "| time interval: {:>12} |".format(
                 epoch,
                 batch,
                 N,
@@ -284,7 +280,7 @@ class TrainWorkflow(object):
             )
         )
 
-    def display_evaluation(self, step, epoch, batch, N):
+    def display_evaluation(self, step, epoch, batch, num_batches):
         """Display cumulative training loss and scores."""
         self.logger.info(
             "{} {} | step {:7d} | epoch {:3d} | {:6d}/{:6d} batches "
@@ -295,7 +291,7 @@ class TrainWorkflow(object):
                 step,
                 epoch,
                 batch,
-                N,
+                num_batches,
                 self.loss_avg.cumulate,
                 self.iou_avg.cumulate,
                 self.aupr_avg.cumulate,
@@ -308,19 +304,20 @@ class TrainWorkflow(object):
     ############################
     def initialize_result_directories(self):
         """Initialize output evaluation and checkpoint directories."""
-        if self.result_dir is not None and self.ckpt_dir is not None:
+        if self.result_dir is not None:
             self.eval_path = self.result_dir
-            self.ckpt_path = self.ckpt_dir
         else:
-
             self.eval_path = os.path.join(
                 self.model_dir,
                 "{}_{}".format(self.dtype.lower(), self.__MODE.lower()),
             )
-            self.ckpt_path = os.path.join(self.model_dir, "checkpoints")
-
-        create_dirs(self.ckpt_path, logger=self.logger)
         create_dirs(self.eval_path, logger=self.logger)
+
+        if self.ckpt_dir is not None:
+            self.ckpt_path = self.ckpt_dir
+        else:
+            self.ckpt_path = os.path.join(self.model_dir, "checkpoints")
+        create_dirs(self.ckpt_path, logger=self.logger)
 
         self.save_model()
 
@@ -334,7 +331,7 @@ class TrainWorkflow(object):
         self.logger.info("Model configurations saved in {}".format(path))
 
     def save_evaluation(self, step, epoch, batch, current_loss):
-        """Save training checkpoint and the avg loss and scores"""
+        """Save a training checkpoint and the avg loss and scores."""
         eval_path = os.path.join(
             self.eval_path, "{}_{}.json".format(self.experiment_name, str(step))
         )
@@ -342,16 +339,15 @@ class TrainWorkflow(object):
             "step": step,
             "epoch": epoch,
             "batch": batch,
-            'train_loss_avg': self.loss_avg.cumulate,
+            "train_loss_avg": self.loss_avg.cumulate,
             "train_iou_avg": self.iou_avg.cumulate,
             "train_aupr_avg": self.aupr_avg.cumulate,
         }
-        # Save evaluation
         with open(eval_path, "w") as outfile:
             json.dump(eval_params, outfile, indent=0)
 
     def save_checkpoint(self, step):
-        """Save checkpoint model state_dict in a .ckpt file."""
+        """Save model state_dict in a checkpoint .ckpt file."""
         ckpt_path = os.path.join(
             self.ckpt_path, "{}_{}.ckpt".format(self.experiment_name, step)
         )

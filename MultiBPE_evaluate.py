@@ -48,8 +48,8 @@ parser.add_argument(
     "--dataset",
     type=str,
     default="data/datasets/training_example/validation_minOverlap200_maxUnion600_example.h5",
-    help="Path to evaluation data. "
-    "Default: data/datasets/training_example/validation_minOverlap200_maxUnion600_example.h5",
+    help="Path to evaluation data. Default: "
+    "data/datasets/training_example/validation_minOverlap200_maxUnion600_example.h5",
 )
 parser.add_argument(
     "--dtype",

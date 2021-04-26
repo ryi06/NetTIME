@@ -57,11 +57,7 @@ class PredictWorkflow(object):
         self.logger = set_logger(
             self.model_dir, self.experiment_name, self.__MODE, self.dtype
         )
-        self.logger.info(
-            "CONFIG:\n{}".format(
-                json.dumps(vars(self.args), indent=4, sort_keys=True)
-            )
-        )
+        display_args(self.args, self.logger)
 
         # Set up GPU options
         if not torch.cuda.is_available():
@@ -83,7 +79,7 @@ class PredictWorkflow(object):
         self.load_checkpoint()
 
         # Start prediction.
-        self.logger.info("Start prediction......")
+        self.logger.info("Start prediction.")
         try:
             self.predict()
             self.logger.info("Prediction finished.")
@@ -117,7 +113,7 @@ class PredictWorkflow(object):
         )
         preprocess_worker.start()
 
-        # Dataloader params
+        # Set up dataloader
         embed_indices = reverse_embedding(self.index_file, merge=self.no_target)
         params = {
             "batch_size": self.batch_size,
@@ -126,7 +122,7 @@ class PredictWorkflow(object):
             "collate_fn": collate_samples,
         }
 
-        # Evaluate
+        # Predict
         for group_name in group_names:
             predict_dset = MultiBPEDataset(
                 self.dataset,
@@ -148,7 +144,6 @@ class PredictWorkflow(object):
 
     def predict_group(self, group_name, preprocess_queue, num_batches):
         """Make prediction for one group using a checkpoint."""
-        # Initialize progress displaying processes
         evaluate_queue = mp.JoinableQueue(maxsize=64)
         evaluate_worker = mp.Process(
             name="evaluate_{}".format(group_name),
@@ -161,7 +156,7 @@ class PredictWorkflow(object):
         with torch.no_grad():
             for b in range(num_batches):
                 dset = preprocess_queue.get()
-                feature, target = push_to_device(dset, self.device)
+                feature, _ = push_to_device(dset, self.device)
                 pred = self.softmax(self.model(feature))
                 evaluate_queue.put(pred.cpu())
 
@@ -188,7 +183,7 @@ class PredictWorkflow(object):
             queue.task_done()
             predictions.append(pred)
 
-        predictions = torch.cat(predictions)
+        predictions = torch.cat(predictions).numpy()
         pred_path = os.path.join(
             self.pred_path, "{}.{}.npz".format(group_name, self.eval_metric)
         )
@@ -197,7 +192,8 @@ class PredictWorkflow(object):
             step=self.step,
             group_name=group_name,
             metric=self.eval_metric,
-            prediction=predictions.numpy(),
+            prediction=predictions,
+            output_key=self.output_key,
         )
 
     ############################
