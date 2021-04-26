@@ -23,10 +23,9 @@ class Encoder(nn.Module):
         infeatures = fasta_size + input_size
         outfeatures = hidden_size * num_directions
 
-        self.fc = nn.Linear(infeatures, outfeatures)
-        self.bn = nn.BatchNorm1d(outfeatures)
-        self.fc_act = getattr(nn, fc_act_fn)()
-
+        self.input_fn = nn.Sequential(
+            nn.Linear(infeatures, outfeatures), getattr(nn, fc_act_fn)()
+        )
 
         assert num_basic_blocks > 0
         self.num_basic_blocks = num_basic_blocks
@@ -46,10 +45,7 @@ class Encoder(nn.Module):
             )
 
     def forward(self, sequence, h0):
-        hid = self.fc(sequence)
-        hid = self.bn(hid.permute(0, 2, 1)).permute(0, 2, 1)
-        hid = self.fc_act(hid)
-
+        hid = self.input_fn(sequence)
         h0 = h0.permute(1, 0, 2).contiguous()
         for ifunc in self.basic_block:
             hid = ifunc(hid, h0)
