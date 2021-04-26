@@ -1,7 +1,13 @@
+import glob
+import os
+import random
+import string
+
 import h5py
 import numpy as np
 import torch
 from torch.utils.data import Dataset
+from tqdm import tqdm
 
 
 class MultiBPEDataset(Dataset):
@@ -42,7 +48,7 @@ class MultiBPEDataset(Dataset):
         return self.dset_length
 
     def __getitem__(self, index):
-        """Generates one sample of size [seq_length, num_features]."""
+        """Generates a sample."""
         with h5py.File(self.file_path, "r") as dset:
             # Get embedding indices (and target).
             if self.no_target:
@@ -107,7 +113,6 @@ class MultiBPEDataset(Dataset):
                         continue
                 group_names.add(group_name)
                 self.__add_index(dset_group[group_name], path, index)
-        print(group_names)
 
     def __add_index(self, group, path, index):
         """Add a sample index to index arrays."""
@@ -167,16 +172,18 @@ def collate_samples(batch):
     return ((feature, label), target)
 
 
+def __push_var(var, device):
+    """Push variable to device."""
+    if var is not None:
+        return var.to(device)
+
+
 def push_to_device(batch, device):
     """Push tensors to device."""
-    def _push_var(var, device):
-        if var is not None:
-            return var.to(device)
-
     inputs, targets = batch
     return (
-        (_push_var(inputs[0], device), _push_var(inputs[1], device)),
-        _push_var(targets, device),
+        (__push_var(inputs[0], device), __push_var(inputs[1], device)),
+        __push_var(targets, device),
     )
 
 
@@ -209,3 +216,159 @@ def get_group_names(
                             continue
                     group_names.add(group_name)
         return group_names
+
+
+##############################
+# CRF Dataset
+##############################
+class Normalizer(object):
+    def __init__(self, class_weight, device=None):
+        self.log_weight = torch.from_numpy(np.log(np.load(class_weight)))
+        if device is not None:
+            self.log_weight = self.log_weight.to(device)
+
+    def normalize(self, x):
+        """Normalize MultiBPE predictions."""
+        return torch.log(x) - self.log_weight
+
+
+class CRFDataset(Dataset):
+    """Characterize a CRF dataset from MultiBPE predictions."""
+
+    def __init__(self, file_path, class_weight, group_name=None):
+        # target_path=None,
+        self.file_path = file_path
+        self.normalizer = Normalizer(class_weight)
+        self.group_name = group_name
+
+        with h5py.File(self.file_path, "r") as dset:
+            self.target_label = True if "target" in dset.keys() else False
+        self.dset_length = self.__initialize_index()
+
+    def __len__(self):
+        """Get the number of samples in the dataset."""
+        return self.dset_length
+
+    def __getitem__(self, index):
+        """Generates a sample."""
+        with h5py.File(self.file_path, "r") as dset:
+            p = self.pred_ary[index]
+            j = self.index_ary[index]
+            pred = torch.from_numpy(dset[p][j]).float()
+            pred = self.normalizer.normalize(pred)
+
+            if self.target_label:
+                t = self.target_ary[index]
+                target = torch.from_numpy(dset[t][j]).long()
+            else:
+                target = None
+        return pred, target
+
+    def __initialize_index(self):
+        """Initialize sample index arrays and self.dset_length."""
+        pred_list = []
+        index_list = []
+        target_list = []
+
+        with h5py.File(self.file_path, "r") as dset:
+            if self.group_name is not None:
+                self.__add_index(
+                    dset, self.group_name, pred_list, target_list, index_list
+                )
+            else:
+                for group_name in dset["prediction"].keys():
+                    self.__add_index(
+                        dset, group_name, pred_list, target_list, index_list
+                    )
+        self.pred_ary = np.array(pred_list)
+        self.index_ary = np.array(index_list)
+        if self.target_label:
+            self.target_ary = np.array(target_list)
+        return len(self.pred_ary)
+
+    def __add_index(self, dset, group_name, pred, target, index):
+        """Add a sample index to index arrays."""
+        pred_group = dset["prediction"][group_name]
+        p = pred_group.name
+        if self.target_label:
+            t = dset["target"][group_name].name
+        for j in np.arange(len(pred_group)):
+            pred.append(p)
+            index.append(j)
+            if self.target_label:
+                target.append(t)
+
+
+def merge_predictions(prediction_dir, logger, tmp_dir, target_path=None):
+    """Create CRF dataset by merging MultiBPE predictions."""
+    pred_pattern = os.path.join(prediction_dir, "*.npz")
+    prediction_files = sorted(glob.glob(pred_pattern))
+    num_files = len(prediction_files)
+    if num_files == 0:
+        raise FileNotFoundError(
+            "No valid prediction file found in {}".format(prediction_dir)
+        )
+    else:
+        logger.info(
+            "{} prediction files trieved from {}".format(
+                num_files, prediction_dir
+            )
+        )
+
+    chars = string.ascii_lowercase + string.ascii_uppercase
+    s = "".join(random.choice(chars) for _ in range(6))
+    file_path = os.path.join(tmp_dir, "crf_evaluate_{}.h5".format(s))
+
+    group_names = set()
+    with h5py.File(file_path, "w") as dset:
+        pred_group = dset.create_group("prediction")
+        if target_path is not None:
+            target_group = dset.create_group("target")
+
+        for file in tqdm(prediction_files):
+            data = np.load(file)
+            group_name = data["group_name"].item()
+            group_names.add(group_name)
+            output_key = data["output_key"]
+            prediction = data["prediction"]
+            pred_group.create_dataset(
+                group_name,
+                shape=prediction.shape,
+                chunks=(1,) + prediction.shape[1:],
+                data=prediction,
+                compression="gzip",
+            )
+
+            if target_path is None:
+                continue
+
+            with h5py.File(target_path, "r") as target_dset:
+                target_list = []
+                for key in output_key:
+                    target_list.append(target_dset[key][group_name][:, :-3])
+                target = np.concatenate(target_list)
+                target_group.create_dataset(
+                    group_name,
+                    shape=target.shape,
+                    chunks=(1,) + target.shape[1:],
+                    data=target,
+                    compression="gzip",
+                )
+
+    logger.info("Merged prediction file saved in {}".format(file_path))
+    return file_path, group_names
+
+
+def CRF_collate_samples(batch):
+    feature = torch.stack([b[0] for b in batch])
+    target = [b[1] for b in batch]
+    if None in target:
+        target = None
+    else:
+        target = torch.stack(target).squeeze()
+    return feature, target
+
+
+def CRF_push_to_device(batch, device):
+    pred, target = batch
+    return __push_var(pred, device), __push_var(target, device)
