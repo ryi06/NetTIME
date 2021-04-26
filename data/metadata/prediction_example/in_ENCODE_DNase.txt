@@ -1,3 +1,0 @@
-TF	cell_type	sample_name	file_accession	peak_file	bigWig_file	assay_type	genome_assembly
-	GM12878	DNase.GM12878	ENCFF273MVV	https://www.encodeproject.org/files/ENCFF273MVV/@@download/ENCFF273MVV.bed.gz	https://www.encodeproject.org/files/ENCFF901GZH/@@download/ENCFF901GZH.bigWig	DNase	hg19
-	K562	DNase.K562	ENCFF621ZJY	https://www.encodeproject.org/files/ENCFF621ZJY/@@download/ENCFF621ZJY.bed.gz	https://www.encodeproject.org/files/ENCFF352SET/@@download/ENCFF352SET.bigWig	DNase	hg19

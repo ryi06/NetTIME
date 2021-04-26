@@ -1,0 +1,4 @@
+TF	cell_type	sample_name	experiment_accession	pwm_file	meme_file	assay_type	genome_assembly
+JUN		hocomoco.JUN	JUN_HUMAN.H11MO.0.A		../data/motifs/hocomoco/JUN_HUMAN.H11MO.0.A.meme	hocomoco	hg19
+JUNB		hocomoco.JUNB	JUNB_HUMAN.H11MO.0.A		../data/motifs/hocomoco/JUNB_HUMAN.H11MO.0.A.meme	hocomoco	hg19
+JUND		hocomoco.JUND	JUND_HUMAN.H11MO.0.A		../data/motifs/hocomoco/JUND_HUMAN.H11MO.0.A.meme	hocomoco	hg19
