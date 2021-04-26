@@ -3,7 +3,7 @@
 USAGE=$'
 Example usage:
 
-./preprocess_v1-3_generate_hdf5.sh [--example_pickle EXAMPLE_PICKLE] \
+./preprocess_v1-3_merge_dataset.sh [--example_pickle EXAMPLE_PICKLE] \
 	[--output_hdf5 OUTPUT_HDF5] \
 	[--generate_hdf5_extra_args GENERATE_HDF5_EXTRA_ARGS]
 
