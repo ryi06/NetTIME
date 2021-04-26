@@ -12,22 +12,22 @@ Flags:
 --input_bed Path to input bed file from which to generate example sequences.
 --condition_metadata Path to a text file specifying the conditions for which to generate data. (Default: ../data/metadata/prediction_example/conditions.txt)
 --genome_fasta Path to decompressed genome fasta file. (Default: ../data/annotations/hg19.fa)
---embedding_index Path to embedding index file specifying the index for TF and cell type labels. (Default: ../data/embeddings/example.pkl)
+--embedding_index Path to embedding index file specifying the index for TF and cell type labels. (Default: ../data/embeddings/pretrained.pkl)
 --sequence_length Example sequence length. (Default: 1000)
 --output_dir Dataset output directory. (Default: ../data/datasets/<CURRENT_DATE>_seqLength<SEQUENCE_LENGTH>)
 --tmp_dir Temporary directory to save intermediate result. (Default: /tmp)
---set_path_extra_args Flags for set_path, specified as "flag1,param1,flag2,param2,flag3". See available optional arguments by running `python set_path.py -h`. (Default: --ct_feature,DNase,--tf_feature,hocomoco)
+--set_path_extra_args Flags for set_path, specified as "--flag1,param1,--flag2,param2,--flag3". See available optional arguments by running `python set_path.py -h`. (Default: --ct_feature,DNase,H3K4me1,H3K4me3,H3K27ac,--tf_feature,hocomoco)
 '
 
 # Specify default values.
 INPUT_BED="" # All entries in this file must be the same length and same as <SEQUENCE_LENGTH>
 CONDITION_METADATA="../data/metadata/prediction_example/conditions.txt"
 GENOME_FASTA="../data/annotations/hg19.fa"
-EMBEDDING_INDEX="../data/embeddings/example.pkl" # Set if target label need to be generated
+EMBEDDING_INDEX="../data/embeddings/pretrained.pkl" # Set if target label need to be generated
 SEQUENCE_LENGTH=1000
 OUTPUT_DIR="../data/datasets/$(date +%Y%m%d)_seqLength${SEQUENCE_LENGTH}"
 TMP_DIR="/tmp"
-SET_PATH_EXTRA_ARGS="--ct_feature,DNase,--tf_feature,hocomoco"
+SET_PATH_EXTRA_ARGS="--ct_feature,DNase,H3K4me1,H3K4me3,H3K27ac,--tf_feature,hocomoco"
 
 while [ "$1" != "" ]; do
 	PARAM=$1

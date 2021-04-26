@@ -1,13 +1,4 @@
-TF	cell_type	sample_name	file_accession	peak_file	bigWig_file	assay_type	genome_assembly					
-	A549	DNase.A549	ENCFF475BVB	https://www.encodeproject.org/files/ENCFF475BVB/@@download/ENCFF475BVB.bed.gz	https://www.encodeproject.org/files/ENCFF723TWJ/@@download/ENCFF723TWJ.bigWig	DNase	hg19					
-	GM12878	DNase.GM12878	ENCFF273MVV	https://www.encodeproject.org/files/ENCFF273MVV/@@download/ENCFF273MVV.bed.gz	https://www.encodeproject.org/files/ENCFF901GZH/@@download/ENCFF901GZH.bigWig	DNase	hg19					
-	K562	DNase.K562	ENCFF621ZJY	https://www.encodeproject.org/files/ENCFF621ZJY/@@download/ENCFF621ZJY.bed.gz	https://www.encodeproject.org/files/ENCFF352SET/@@download/ENCFF352SET.bigWig	DNase	hg19					
-	A549	H3K4me1.A549	ENCFF557FXL	https://www.encodeproject.org/files/ENCFF557FXL/@@download/ENCFF557FXL.bed.gz	https://www.encodeproject.org/files/ENCFF063TVJ/@@download/ENCFF063TVJ.bigWig	H3K4me1	hg19					
-	GM12878	H3K4me1.GM12878	ENCFF921LKB	https://www.encodeproject.org/files/ENCFF921LKB/@@download/ENCFF921LKB.bed.gz	https://www.encodeproject.org/files/ENCFF372EXQ/@@download/ENCFF372EXQ.bigWig	H3K4me1	hg19					
-	K562	H3K4me1.K562	ENCFF730VTO	https://www.encodeproject.org/files/ENCFF730VTO/@@download/ENCFF730VTO.bed.gz	https://www.encodeproject.org/files/ENCFF012JPC/@@download/ENCFF012JPC.bigWig	H3K4me1	hg19					
-	A549	H3K4me3.A549	ENCFF558VNZ	https://www.encodeproject.org/files/ENCFF558VNZ/@@download/ENCFF558VNZ.bed.gz	https://www.encodeproject.org/files/ENCFF522AAU/@@download/ENCFF522AAU.bigWig	H3K4me3	hg19					
-	GM12878	H3K4me3.GM12878	ENCFF295GNH	https://www.encodeproject.org/files/ENCFF295GNH/@@download/ENCFF295GNH.bed.gz	https://www.encodeproject.org/files/ENCFF154XCY/@@download/ENCFF154XCY.bigWig	H3K4me3	hg19					
-	K562	H3K4me3.K562	ENCFF737AMS	https://www.encodeproject.org/files/ENCFF737AMS/@@download/ENCFF737AMS.bed.gz	https://www.encodeproject.org/files/ENCFF285EUA/@@download/ENCFF285EUA.bigWig	H3K4me3	hg19					
-	A549	H3K27ac.A549	ENCFF860DII	https://www.encodeproject.org/files/ENCFF860DII/@@download/ENCFF860DII.bed.gz	https://www.encodeproject.org/files/ENCFF153QRX/@@download/ENCFF153QRX.bigWig	H3K27ac	hg19					
-	GM12878	H3K27ac.GM12878	ENCFF816AHV	https://www.encodeproject.org/files/ENCFF816AHV/@@download/ENCFF816AHV.bed.gz	https://www.encodeproject.org/files/ENCFF440GZA/@@download/ENCFF440GZA.bigWig	H3K27ac	hg19					
-	K562	H3K27ac.K562	ENCFF044JNJ	https://www.encodeproject.org/files/ENCFF044JNJ/@@download/ENCFF044JNJ.bed.gz	https://www.encodeproject.org/files/ENCFF840LLW/@@download/ENCFF840LLW.bigWig	H3K27ac	hg19					
+TF	cell_type	sample_name	file_accession	peak_file	bigWig_file	assay_type	genome_assembly
+	A549	DNase.A549	ENCFF475BVB	https://www.encodeproject.org/files/ENCFF475BVB/@@download/ENCFF475BVB.bed.gz	https://www.encodeproject.org/files/ENCFF723TWJ/@@download/ENCFF723TWJ.bigWig	DNase	hg19
+	GM12878	DNase.GM12878	ENCFF273MVV	https://www.encodeproject.org/files/ENCFF273MVV/@@download/ENCFF273MVV.bed.gz	https://www.encodeproject.org/files/ENCFF901GZH/@@download/ENCFF901GZH.bigWig	DNase	hg19
+	K562	DNase.K562	ENCFF621ZJY	https://www.encodeproject.org/files/ENCFF621ZJY/@@download/ENCFF621ZJY.bed.gz	https://www.encodeproject.org/files/ENCFF352SET/@@download/ENCFF352SET.bigWig	DNase	hg19

@@ -24,14 +24,16 @@ parser.add_argument(
     "--ct_feature",
     type=str,
     default=None,
-    help="A set of keys for cell type features, specified as 'ct1,ct2'. "
+    nargs="+",
+    help="A list of keys for cell type features, specified as 'ct1 ct2'. "
     "Default None, no cell type feature included.",
 )
 parser.add_argument(
     "--tf_feature",
     type=str,
     default=None,
-    help="A set of keys for TF features, specified by 'tf1,tf2'. "
+    nargs="+",
+    help="A list of keys for TF features, specified by 'tf1 tf2'. "
     "Default None, no TF feature included",
 )
 parser.add_argument(
@@ -68,7 +70,7 @@ input_root = os.path.join(args.output_folder, "feature")
 os.makedirs(input_root, exist_ok=True)
 
 print_time("Processing cell type features", start_time)
-CT_features = args.ct_feature.split("+") if args.ct_feature is not None else []
+CT_features = args.ct_feature if args.ct_feature is not None else []
 for feature in CT_features:
     for ct in CTs:
         input_name = "{}.{}".format(feature, ct)
@@ -80,7 +82,7 @@ for feature in CT_features:
             output_dict["input"][i][feature][ct] = coordinator.get_next_entry()
 
 print_time("Processing TF features", start_time)
-TF_features = args.tf_feature.split("+") if args.tf_feature is not None else []
+TF_features = args.tf_feature if args.tf_feature is not None else []
 for feature in TF_features:
     for tf in TFs:
         input_name = "{}.{}".format(feature, tf)
