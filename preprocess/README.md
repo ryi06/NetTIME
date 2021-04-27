@@ -1,6 +1,6 @@
-# Generating training and prediction data for MultiBPE
+# Data generation for MultiBPE
 
-## Data generation for training
+## Generating data to train a MultiBPE model from scratch
 Let's try to generate MultiBPE training data using ChIP-seq data from 5 conditions: [JUN.A549](https://www.encodeproject.org/experiments/ENCSR996DUT/), [JUNB.K562](https://www.encodeproject.org/experiments/ENCSR795IYP/), [JUND.A549](https://www.encodeproject.org/experiments/ENCSR000BRF/), [JUND.GM12878](https://www.encodeproject.org/experiments/ENCSR000DYS/) and [JUND.K562](https://www.encodeproject.org/experiments/ENCSR000EGN/).
 Data generation for training a MultiBPE model requires the following metadata files: 
 1. A text file specifying target TF ChIP-seq data locations.
@@ -11,17 +11,17 @@ Data generation for training a MultiBPE model requires the following metadata fi
 Example metadata files are provided in `data/metadata/training_example`.  The example pickle index file is provided in `data/embeddings`
 ```
 data/metadata/training_example/
-|-- in_ENCODE_DNase.txt
-|-- in_ENCODE_hocomoco.txt
-|-- out_ENCODE_TF_ChIP.txt
+|-- ct_feature.txt
+|-- target.txt
 |-- test_regions.bed
+|-- tf_feature.txt
 |-- training_regions.bed
 `-- validation_regions.bed
 data/embeddings/
 `-- example.pkl
 ```
 
-For this demo, we include DNase-seq as our cell type specific feature, and HOCOMOCO TF motif enrichment as our TF specific features. More features can be included by providing additional metadata text files.
+For this demo, we include DNase-seq as our cell type specific feature, and HOCOMOCO TF motif enrichment as our TF specific features.
 
 Make sure to also download the genome fasta file and save it in `data/annotations`:
 ```
@@ -41,10 +41,11 @@ The above procedure can be achieved by running the following:
 ```
 cd preprocess
 ./preprocess_v1-1_generate_example_sequences.sh \
---region_bed ../data/metadata/training_example/training_regions.bed,../data/metadata/training_example/validation_regions.bed,../data/metadata/training_example/test_regions.bed --output_prefix training,validation,test \
+--region_bed ../data/metadata/training_example/training_regions.bed,../data/metadata/training_example/validation_regions.bed,../data/metadata/training_example/test_regions.bed \
+--output_prefix training,validation,test \
 --output_dir ../data/datasets/training_example
 ```
-The main goal of this step is to create an example `.pkl` file necessary for the downstream data collection steps. It specifies the genomic locations of each example sequence, and where the retrieved feature signal track and target labels will be saved.
+The main goal of this step is to create an example `.pkl` file necessary for the downstream data collection steps. It specifies the genomic locations of each example sequence, and where the retrieved feature signal tracks and target labels will be saved.
 
 Alternatively, you can provide your own peak set stored in the [bed file format](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) and use `preprocess_v1-1-2_generate_custom_examples.sh` to generate the example `.pkl` file. See example [here](#generate-example-sequences).
 
@@ -58,7 +59,7 @@ for dset in "${datasets[@]}"; do
 	REGION_BED="../data/metadata/training_example/${dset}_regions.bed"
 	ZSCORE_DIR="../data/datasets/training_example/${dset}/zscore_params"
 	# Retrieve target labels
-	# Process 2nd to 6th entries in ../data/metadata/training_example/out_ENCODE_TF_ChIP.txt
+	# Process 2nd to 6th entries in ../data/metadata/training_example/target.txt
 	for job_id in {2..6}; do 
 		# Conserved peaks
 		./preprocess_v1-2_retrieve_signal.sh --job_id $job_id \
@@ -70,19 +71,19 @@ for dset in "${datasets[@]}"; do
 	done
 
 	# Retrieve DNase signal
-	# Process 2nd to 4th entries in ../data/metadata/training_example/in_ENCODE_DNase.txt
+	# Process 2nd to 4th entries in ../data/metadata/training_example/ct_feature.txt
 	for job_id in {2..4}; do
 		./preprocess_v1-2_retrieve_signal.sh --job_id $job_id \
-		--metadata "../data/metadata/training_example/in_ENCODE_DNase.txt" \
+		--metadata "../data/metadata/training_example/ct_feature.txt" \
 		--example_pickle $EXAMPLE_PICKLE --region_bed $REGION_BED \
 		--zscore_dir $ZSCORE_DIR
 	done
 
 	# Retrieve hocomoco motif enrichment scores
-	# Process 2nd to 4th entries in ../data/metadata/training_example/in_ENCODE_hocomoco.txt
+	# Process 2nd to 4th entries in ../data/metadata/training_example/tf_feature.txt
 	for job_id in {2..4}; do
 		./preprocess_v1-2_retrieve_signal.sh --job_id $job_id \
-		--metadata "../data/metadata/training_example/in_ENCODE_hocomoco.txt" \
+		--metadata "../data/metadata/training_example/tf_feature.txt" \
 		--example_pickle $EXAMPLE_PICKLE --region_bed $REGION_BED \
 		--zscore_dir $ZSCORE_DIR
 	done
@@ -96,7 +97,7 @@ for dset in "${datasets[@]}"; do
 	REGION_BED="../data/metadata/training_example/${dset}_regions.bed"
 	ZSCORE_DIR="../data/datasets/training_example/${dset}/zscore_params"
 	# Retrieve target labels
-	# Process 2nd to 6th entries in ../data/metadata/training_example/out_ENCODE_TF_ChIP.txt
+	# Process 2nd to 6th entries in ../data/metadata/training_example/target.txt
 	sbatch --array=2-6 preprocess_v1-2_retrieve_signal.sh \
 	--example_pickle $EXAMPLE_PICKLE --region_bed $REGION_BED \
 	--tmp_dir $SLURM_JOBTMP
@@ -105,16 +106,16 @@ for dset in "${datasets[@]}"; do
 	--target_type "output_relaxed" --tmp_dir $SLURM_JOBTMP
 
 	# Retrieve DNase signal
-	# Process 2nd to 4th entries in ../data/metadata/training_example/in_ENCODE_DNase.txt
+	# Process 2nd to 4th entries in ../data/metadata/training_example/ct_feature.txt
 	sbatch --array=2-4 preprocess_v1-2_retrieve_signal.sh \
-	--metadata "../data/metadata/training_example/in_ENCODE_DNase.txt" \
+	--metadata "../data/metadata/training_example/ct_feature.txt" \
 	--example_pickle $EXAMPLE_PICKLE --region_bed $REGION_BED \
 	--zscore_dir $ZSCORE_DIR --tmp_dir $SLURM_JOBTMP
 
 	# Retrieve hocomoco motif enrichment scores
-	# Process 2nd to 4th entries in ../data/metadata/training_example/in_ENCODE_hocomoco.txt
+	# Process 2nd to 4th entries in ../data/metadata/training_example/tf_feature.txt
 	sbatch --array=2-4 preprocess_v1-2_retrieve_signal.sh \
-	--metadata "../data/metadata/training_example/in_ENCODE_hocomoco.txt" \
+	--metadata "../data/metadata/training_example/tf_feature.txt" \
 	--example_pickle $EXAMPLE_PICKLE --region_bed $REGION_BED \
 	--zscore_dir $ZSCORE_DIR --tmp_dir $SLURM_JOBTMP
 done
@@ -132,9 +133,9 @@ done
 ```
 [Here](../data/datasets/training_example/training_example_directory_structure.md) is a list of files you will be able to generate after successfully running the above three steps.
 
+## Generating data to make predictions from a trained model
+In this demo, we use the [pretrained model](../pretrained/seq_CT/) to make predictions from 2 conditions: [JUN.K562](https://www.encodeproject.org/experiments/ENCSR000EFS/) and [JUNB.GM12878](https://www.encodeproject.org/experiments/ENCSR897MMC/). This particular model was trained on the DNA sequence as well as 4 types of cell type-specific features (DNase, H3K4me1, H3K4me3, H3K27ac). 
 
-## Data generation for prediction
-Let's use the trained model to make predictions using ChIP-seq data from 2 conditions: [JUN.K562](https://www.encodeproject.org/experiments/ENCSR000EFS/) and [JUNB.GM12878](https://www.encodeproject.org/experiments/ENCSR897MMC/).
 Data generation for MultiBPE prediction requires the following metadata files: 
 1. A text file specifying the conditions to make predictions for.
 2. A list of text files specifying locations of feature data files. 
@@ -145,58 +146,45 @@ Example metadata files are provided in `data/metadata/prediction_example`.  The 
 ```
 data/metadata/prediction_example/
 |-- conditions.txt
-|-- in_ENCODE_DNase.txt
-|-- in_ENCODE_hocomoco.txt
-`-- predict.bed
+|-- ct_feature.txt
+|-- predict.bed
+`-- tf_feature.txt
 data/embeddings/
-`-- example.pkl
+`-- pretrained.pkl
 ```
 
 ### Generate example sequences
-Generate example sequences given a peak set bed file. Each interval in the bed file is used to create one example sequence of length `SEQUENCE_LENGTH` where the midpoints of the example and the interval are the same. If intervals in your bed file are much longer than `SEQUENCE_LENGTH`, we recommend binning the intervals first before running this script. Turn on the `--skip_target` flag when target labels are not available.
+Generate example sequences given a peak set bed file. Each interval in the bed file is used to create one example sequence of length `SEQUENCE_LENGTH` where the midpoints of the example and the interval are the same. If intervals in your bed file are much longer than `SEQUENCE_LENGTH`, we recommend binning the intervals before running this script. Turn on the `--skip_target` flag when target labels are not available.
 ```
 cd preprocess
 ./preprocess_v1-1-2_generate_custom_examples.sh \
 --input_bed ../data/metadata/prediction_example/predict.bed \
 --output_dir ../data/datasets/prediction_example \
---set_path_extra_args --ct_feature,DNase,--tf_feature,hocomoco,--skip_target
+--set_path_extra_args --ct_feature,DNase,H3K4me1,H3K4me3,H3K27ac,--skip_target
 ```
 
 ### Retrieve feature signal tracks
-Retreive feature signals (DNase-seq and HOCOMOCO motif enrichment) for prediction dataset. Run the following to retrieve data sequentially. See [similar example above](#step-2-retrieve-feature-signal-tracks-and-target-labels) for instructions to retrieve data in a high performance computing environment such as [Slurm](https://slurm.schedmd.com/).
+Retreive feature signals (DNase-seq and HOCOMOCO motif enrichment) for prediction dataset. Run the following to retrieve data sequentially. See [similar example below](#step-2-retrieve-feature-signal-tracks-and-target-labels) for instructions to retrieve data in a high performance computing environment such as [Slurm](https://slurm.schedmd.com/).
 ```
-EXAMPLE_PICKLE="../data/datasets/prediction_example/predict_example.pkl"
-ZSCORE_DIR="../data/datasets/prediction_example/zscore_params"
-
-# Retrieve DNase signal
-# Process 2nd and 3rd entries in ../data/metadata/prediction_example/in_ENCODE_DNase.txt
-for job_id in {2..3}; do
+# Process 2nd and 9th entries in ../data/metadata/prediction_example/ct_feature.txt
+for job_id in {2..9}; do
 	./preprocess_v1-2_retrieve_signal.sh --job_id $job_id \
-	--metadata "../data/metadata/prediction_example/in_ENCODE_DNase.txt" \
-	--example_pickle $EXAMPLE_PICKLE --zscore_dir $ZSCORE_DIR
-done
-
-# Retrieve hocomoco motif enrichment scores
-# Process 2nd and 3rd entries in ../data/metadata/prediction_example/in_ENCODE_hocomoco.txt
-for job_id in {2..3}; do
-	./preprocess_v1-2_retrieve_signal.sh --job_id $job_id \
-	--metadata "../data/metadata/prediction_example/in_ENCODE_hocomoco.txt" \
-	--example_pickle $EXAMPLE_PICKLE --zscore_dir $ZSCORE_DIR
+	--metadata "../data/metadata/prediction_example/ct_feature.txt" \
+	--example_pickle "../data/datasets/prediction_example/predict_example.pkl" \
+	--zscore_dir "../data/datasets/prediction_example/zscore_params"
 done
 ```
 
 ### Merge data files
 Combine the retrieved feature signals into one [HDF5 file](https://www.hdfgroup.org/solutions/hdf5/). Turn on the `--skip_target` flag when target labels are not available.
 ```
-EXAMPLE_PICKLE="../data/datasets/prediction_example/predict_example.pkl"
-OUTPUT_HDF5="../data/datasets/prediction_example/predict_example.h5"
-EXTRA_ARGS="--ct_feature,DNase,--tf_feature,hocomoco,--compression,--skip_target,--condition_metadata,../data/metadata/prediction_example/conditions.txt"
-./preprocess_v1-3_merge_dataset.sh --example_pickle $EXAMPLE_PICKLE \
---output_hdf5 $OUTPUT_HDF5 --generate_hdf5_extra_args $EXTRA_ARGS
+./preprocess_v1-3_merge_dataset.sh \
+--example_pickle "../data/datasets/prediction_example/predict_example.pkl" \
+--output_hdf5 "../data/datasets/prediction_example/predict_example.h5" \
+--generate_hdf5_extra_args "--ct_feature,DNase,H3K4me1,H3K4me3,H3K27ac,--compression,--skip_target,--condition_metadata,../data/metadata/prediction_example/conditions.txt"
 ```
 
 [Here](../data/datasets/prediction_example/prediction_example_directory_structure.md) is a list of files you will be able to generate after successfully running the above three steps.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE3NTE5ODEyNDUsNzg0NTEyNzk5LC03ND
-Y1NzY3NDksLTc0NjU3Njc0OV19
+eyJoaXN0b3J5IjpbLTMyMDI0Njg0N119
 -->

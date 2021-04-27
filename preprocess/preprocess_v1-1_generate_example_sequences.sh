@@ -13,7 +13,7 @@ Example usage:
 Flags:
 --region_bed Paths to bed files specifying genomic regions from which to generate examples, specified as "file1,file2". (Default: ../data/metadata/training_example/training_regions.bed)
 --output_prefix Output file name prefices, specified as "prefix1,prefix2". One prefix per region_bed file. (Default: training)
---chip_metadata Path to ChIP-seq metadata file. (Default: ../data/metadata/training_example/out_ENCODE_TF_ChIP.txt)
+--chip_metadata Path to ChIP-seq metadata file. (Default: ../data/metadata/training_example/target.txt)
 --genome_fasta Path to decompressed genome fasta file. (Default: ../data/annotations/hg19.fa)
 --embedding_index Path to embedding index file specifying the index for TF and cell type labels. (Default: ../data/embeddings/example.pkl)
 --sequence_length Example sequence length. (Default: 1000)
@@ -27,7 +27,7 @@ Flags:
 # Specify default values.
 REGION_BED="../data/metadata/training_example/training_regions.bed"
 OUTPUT_PREFIX="training"
-ChIP_METADATA="../data/metadata/training_example/out_ENCODE_TF_ChIP.txt"
+ChIP_METADATA="../data/metadata/training_example/target.txt"
 GENOME_FASTA="../data/annotations/hg19.fa"
 EMBEDDING_INDEX="../data/embeddings/example.pkl"
 SEQUENCE_LENGTH=1000

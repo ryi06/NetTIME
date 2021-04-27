@@ -10,7 +10,7 @@ Usage:
 	[--tmp_dir TMP_DIR]
 
 Flags:
---metadata Path to feature or target metadata file. (Default: ../data/metadata/training_example/out_ENCODE_TF_ChIP.txt)
+--metadata Path to feature or target metadata file. (Default: ../data/metadata/training_example/target.txt)
 --example_pickle Path to example.pkl file. (Default: ../data/datasets/training_example/training/training_minOverlap200_maxUnion600_example.pkl)
 --region_bed Path to bed file specifying genomic regions from which to generate examples. Optional but specifying REGION_BED file can speed up the processing time when the valid region is small compared to the genome.
 --sequence_length Example sequence length. (Default: 1000)
@@ -22,7 +22,7 @@ Flags:
 '
 
 # Specify default values.
-METADATA="../data/metadata/training_example/out_ENCODE_TF_ChIP.txt"
+METADATA="../data/metadata/training_example/target.txt"
 EXAMPLE_PICKLE="../data/datasets/training_example/training/training_minOverlap200_maxUnion600_example_path.pkl"
 REGION_BED=""
 SEQUENCE_LENGTH=1000
