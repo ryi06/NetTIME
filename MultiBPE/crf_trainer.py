@@ -304,8 +304,23 @@ class CRFTrainWorkflow(object):
         if self.ckpt_dir is not None:
             self.ckpt_path = self.ckpt_dir
         else:
-            self.ckpt_path = os.path.join(self.model_dir, "crf_checkpoint")
+            self.ckpt_path = os.path.join(self.model_dir, "crf_checkpoints")
         create_dirs(self.ckpt_path, logger=self.logger)
+
+        self.save_model()
+
+    def save_model(self):
+        path = os.path.join(
+            self.model_dir, "{}_crf.config".format(self.experiment_name)
+        )
+        params = {
+            "args": self.args,
+            "output_size": self.output_size,
+            "state_dict": self.model.state_dict(),
+            "normalizer": self.normalizer,
+        }
+        torch.save(params, path)
+        self.logger.info("Model configurations saved in {}".format(path))
 
     def save_evaluation(self, step, epoch, batch, current_loss):
         """Save a training checkpoint and the avg loss and scores."""

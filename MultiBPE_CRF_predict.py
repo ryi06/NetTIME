@@ -25,10 +25,10 @@ parser.add_argument(
     "--seed", type=int, default=1111, help="Random seed. Default: 1111"
 )
 parser.add_argument(
-    "--multibpe_config",
+    "--model_config",
     type=str,
     default=None,
-    help="Specify an alternative path to MultiBPE .config file.",
+    help="Specify an alternative path to CRF .config file.",
 )
 parser.add_argument(
     "--best_ckpt",
@@ -55,9 +55,9 @@ parser.add_argument(
 parser.add_argument(
     "--class_weight",
     type=str,
-    default="data/datasets/training_example/training_minOverlap200_maxUnion600_example_weight.npy",
-    help="Path to a numpy .npy file specifying the class weight. Default: "
-    "data/datasets/training_example/training_minOverlap200_maxUnion600_example_weight.npy",
+    default=None,
+    help="Path to a numpy .npy file specifying the class weight. "
+    "Default: None, use class weight generated from training data.",
 )
 
 # Save
@@ -96,7 +96,7 @@ workflow = CRFPredictWorkflow()
 workflow.batch_size = args.batch_size
 workflow.num_workers = args.num_workers
 workflow.seed = args.seed
-workflow.multibpe_config = args.multibpe_config
+workflow.model_config = args.model_config
 workflow.best_ckpt = args.best_ckpt
 
 # Data

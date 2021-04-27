@@ -25,7 +25,7 @@ class CRFEvaluateWorkflow(object):
         self.batch_size = None
         self.num_workers = None
         self.seed = None
-        self.multibpe_config = None
+        self.model_config = None
         self.ckpt_dir = None
 
         # Data
@@ -232,7 +232,7 @@ class CRFEvaluateWorkflow(object):
         if self.ckpt_dir is not None:
             self.ckpt_path = self.ckpt_dir
         else:
-            self.ckpt_path = os.path.join(self.model_dir, "crf_checkpoint")
+            self.ckpt_path = os.path.join(self.model_dir, "crf_checkpoints")
 
     ############################
     # Loading model and checkpoint
@@ -240,17 +240,16 @@ class CRFEvaluateWorkflow(object):
     def load_model(self):
         """Load args from .config file and initialize CRF classifier."""
         # Load model params
-        if self.multibpe_config is not None:
-            path = self.multibpe_config
+        if self.model_config is not None:
+            path = self.model_config
         else:
             path = os.path.join(
-                self.model_dir, "{}.config".format(self.experiment_name)
+                self.model_dir, "{}_crf.config".format(self.experiment_name)
             )
         params = torch.load(path, map_location="cpu")
-        output_size = params["args"].output_size
 
         # Initialize classifier
-        self.model = CRF(output_size, batch_first=True)
+        self.model = CRF(params["output_size"], batch_first=True)
         self.model.to(self.device)
 
     def load_checkpoint(self, ckpt_path):

@@ -27,7 +27,7 @@ class CRFPredictWorkflow(object):
         self.batch_size = None
         self.num_workers = None
         self.seed = None
-        self.multibpe_config = None
+        self.model_config = None
         self.best_ckpt = None
 
         # Data
@@ -111,7 +111,10 @@ class CRFPredictWorkflow(object):
         for group_name in group_names:
             # Initialize DataLoader
             predict_dset = CRFDataset(
-                file_path, self.class_weight, group_name=group_name
+                file_path,
+                self.class_weight,
+                normalizer=self.normalizer,
+                group_name=group_name,
             )
             predict_iter = DataLoader(predict_dset, **params)
             num_batches = len(predict_iter)
@@ -236,17 +239,20 @@ class CRFPredictWorkflow(object):
     def load_model(self):
         """Load args from .config file and initialize CRF classifier."""
         # Load model params
-        if self.multibpe_config is not None:
-            path = self.multibpe_config
+        if self.model_config is not None:
+            path = self.model_config
         else:
             path = os.path.join(
-                self.model_dir, "{}.config".format(self.experiment_name)
+                self.model_dir, "{}_crf.config".format(self.experiment_name)
             )
         params = torch.load(path, map_location="cpu")
-        output_size = params["args"].output_size
+        if self.class_weight is None:
+            self.normalizer = params["normalizer"]
+        else:
+            self.normalizer = None
 
         # Initialize classifier
-        self.model = CRF(output_size, batch_first=True)
+        self.model = CRF(params["output_size"], batch_first=True)
         self.model.to(self.device)
 
     def load_checkpoint(self):

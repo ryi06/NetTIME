@@ -25,10 +25,10 @@ parser.add_argument(
     "--seed", type=int, default=1111, help="Random seed. Default: 1111"
 )
 parser.add_argument(
-    "--multibpe_config",
+    "--model_config",
     type=str,
     default=None,
-    help="Specify an alternative path to MultiBPE .config file.",
+    help="Specify an alternative path to CRF .config file.",
 )
 parser.add_argument(
     "--ckpt_dir",
@@ -102,7 +102,7 @@ workflow = CRFEvaluateWorkflow()
 workflow.batch_size = args.batch_size
 workflow.num_workers = args.num_workers
 workflow.seed = args.seed
-workflow.multibpe_config = args.multibpe_config
+workflow.model_config = args.model_config
 workflow.ckpt_dir = args.ckpt_dir
 
 # Data

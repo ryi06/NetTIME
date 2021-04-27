@@ -235,10 +235,17 @@ class Normalizer(object):
 class CRFDataset(Dataset):
     """Characterize a CRF dataset from MultiBPE predictions."""
 
-    def __init__(self, file_path, class_weight, group_name=None):
+    def __init__(
+        self, file_path, class_weight, normalizer=None, group_name=None
+    ):
         # target_path=None,
         self.file_path = file_path
-        self.normalizer = Normalizer(class_weight)
+        if class_weight is not None and os.path.isfile(class_weight):
+            self.normalizer = Normalizer(class_weight)
+        elif normalizer is not None:
+            self.normalizer = normalizer
+        else:
+            raise RuntimeError("No class weight file or normalizer provided.")
         self.group_name = group_name
 
         with h5py.File(self.file_path, "r") as dset:
