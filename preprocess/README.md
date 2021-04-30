@@ -164,7 +164,7 @@ cd preprocess
 ```
 
 ### Retrieve feature signal tracks
-Retreive feature signals (DNase-seq and HOCOMOCO motif enrichment) for prediction dataset. Run the following to retrieve data sequentially. See [similar example below](#step-2-retrieve-feature-signal-tracks-and-target-labels) for instructions to retrieve data in a high performance computing environment such as [Slurm](https://slurm.schedmd.com/).
+Retreive feature signals (DNase-seq and HOCOMOCO motif enrichment) for prediction dataset. Run the following to retrieve data sequentially. See [similar example](#step-2-retrieve-feature-signal-tracks-and-target-labels) above for instructions to retrieve data in a high performance computing environment such as [Slurm](https://slurm.schedmd.com/).
 ```
 # Process 2nd and 9th entries in ../data/metadata/prediction_example/ct_feature.txt
 for job_id in {2..9}; do
@@ -186,5 +186,5 @@ Combine the retrieved feature signals into one [HDF5 file](https://www.hdfgroup.
 
 [Here](../data/datasets/prediction_example/prediction_example_directory_structure.md) is a list of files you will be able to generate after successfully running the above three steps.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTMyMDI0Njg0N119
+eyJoaXN0b3J5IjpbMzQ1ODAxNDI3LC0zMjAyNDY4NDddfQ==
 -->
