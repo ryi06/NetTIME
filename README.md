@@ -55,15 +55,3 @@ python MultiBPE_CRF_predict.py \
 ## Training a MultiBPE model
 
 A tutorial on how to train a MultiBPE model using [example training data](data/datasets/training_example/) can be found in [training_example.md](training_example.md).
-
-
-
-<!--stackedit_data:
-eyJoaXN0b3J5IjpbMTI0MTA5ODkzMCwtMTkxMzM4NzgyNCwxND
-U0MDAxMTc0LC0xNDU3MTk4ODA1LC03NTY3MjE2MzIsMTg4MjY1
-NzI5LDkzNjcxNzc3MSwyMTExMDA1OTEyLC0xNjI5NDI2MDA0LD
-E2NTUzODI1MzMsLTE5OTIxMzY1NDAsODQyNTE1MjQ0LC02NDAw
-NTYyNjUsLTExNDYyNTk1ODYsMTQ2Mzk3MDA5MywtMjY5NTMwOD
-YxLC0yMTMwMDU4NjkxLDE3OTYyODY2MTksMTg3MjQ3NjEyNF19
-
--->
