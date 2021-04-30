@@ -1,0 +1,3 @@
+TF	cell_type	sample_name
+JUN	K562	JUN.K562
+JUNB	GM12878	JUNB.GM12878

@@ -3,5 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-#Ipython Notebook
+# Ipython Notebook
 .ipynb_checkpoints
+
+# Data preprocess intermediate files
+data/datasets/training_example/*/
+data/datasets/prediction_example/*/
+data/datasets/prediction_example/*.[bfp]*
