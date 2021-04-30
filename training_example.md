@@ -100,7 +100,6 @@ python MultiBPE_CRF_predict.py \
 --prediction_dir "experiments/training_example/test_predict/" \
 --experiment_name "training_example"
 ```
-
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEyMzY1MDgwOTJdfQ==
+eyJoaXN0b3J5IjpbOTQ5MjExMTBdfQ==
 -->
