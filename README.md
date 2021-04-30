@@ -56,16 +56,14 @@ python MultiBPE_CRF_predict.py \
 
 A tutorial on how to train a MultiBPE model using [example training data](data/datasets/training_example/) can be found in [training_example.md](training_example.md).
 
-## Data and pretrained models
-Data we used for training MultiBPE model are provided as hdf5 files. Download them here: train, validation, test.
-
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE5MTMzODc4MjQsMTQ1NDAwMTE3NCwtMT
-Q1NzE5ODgwNSwtNzU2NzIxNjMyLDE4ODI2NTcyOSw5MzY3MTc3
-NzEsMjExMTAwNTkxMiwtMTYyOTQyNjAwNCwxNjU1MzgyNTMzLC
-0xOTkyMTM2NTQwLDg0MjUxNTI0NCwtNjQwMDU2MjY1LC0xMTQ2
-MjU5NTg2LDE0NjM5NzAwOTMsLTI2OTUzMDg2MSwtMjEzMDA1OD
-Y5MSwxNzk2Mjg2NjE5LDE4NzI0NzYxMjRdfQ==
+eyJoaXN0b3J5IjpbMTI0MTA5ODkzMCwtMTkxMzM4NzgyNCwxND
+U0MDAxMTc0LC0xNDU3MTk4ODA1LC03NTY3MjE2MzIsMTg4MjY1
+NzI5LDkzNjcxNzc3MSwyMTExMDA1OTEyLC0xNjI5NDI2MDA0LD
+E2NTUzODI1MzMsLTE5OTIxMzY1NDAsODQyNTE1MjQ0LC02NDAw
+NTYyNjUsLTExNDYyNTk1ODYsMTQ2Mzk3MDA5MywtMjY5NTMwOD
+YxLC0yMTMwMDU4NjkxLDE3OTYyODY2MTksMTg3MjQ3NjEyNF19
+
 -->
