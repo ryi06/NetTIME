@@ -1,9 +1,9 @@
 import argparse
 
-from MultiBPE import EvaluateWorkflow
+from NetTIME import EvaluateWorkflow
 
 ######## User Input ########
-parser = argparse.ArgumentParser("Evaluating a trained MultiBPE model.")
+parser = argparse.ArgumentParser("Evaluating a trained NetTIME model.")
 
 # Evaluation parameters
 parser.add_argument(

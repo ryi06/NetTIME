@@ -1,10 +1,10 @@
 import argparse
 
-from MultiBPE import CRFPredictWorkflow
+from NetTIME import CRFPredictWorkflow
 
 ######## User Input ########
 parser = argparse.ArgumentParser(
-    "Make predictions using MultiBPE linear chain CRF classifier."
+    "Make predictions using NetTIME linear chain CRF classifier."
 )
 
 # Prediction parameters
@@ -44,7 +44,7 @@ parser.add_argument(
     "--prediction_dir",
     type=str,
     default=None,
-    help="Path to MultiBPE prediction directory.",
+    help="Path to NetTIME prediction directory.",
 )
 parser.add_argument(
     "--dtype",

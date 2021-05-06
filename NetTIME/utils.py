@@ -88,7 +88,7 @@ class CheckpointTracker(object):
 # FUNCTIONS
 ########################
 def load_pretrained_model(model, model_path):
-    """Load a pretrained MultiBPE model"""
+    """Load a pretrained NetTIME model"""
     params = torch.load(model_path)
     model.load_state_dict(params["state_dict"])
     return model

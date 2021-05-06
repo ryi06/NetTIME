@@ -10,12 +10,12 @@ from torchcrf import CRF
 
 from .calculate_metrics import ScoreTracker
 from .dataset import (
-    MultiBPEDataset,
+    NetTIMEDataset,
     Normalizer,
     collate_samples,
     push_to_device,
 )
-from .model import MultiBPE
+from .model import NetTIME
 from .utils import *
 
 
@@ -27,8 +27,8 @@ class CRFTrainWorkflow(object):
         self.batch_size = None
         self.num_epochs = None
         self.num_workers = None
-        self.multibpe_config = None
-        self.multibpe_ckpt = None
+        self.nettime_config = None
+        self.nettime_ckpt = None
 
         self.learning_rate = None
         self.weight_decay = None
@@ -74,10 +74,10 @@ class CRFTrainWorkflow(object):
             "Use {} GPU(s) for training".format(torch.cuda.device_count())
         )
 
-        # Load MultiBPE
-        self.logger.info("Loading MultiBPE checkpoint.")
-        self.load_MultiBPE_checkpoint()
-        self.logger.info("MultiBPE ARCHITECTURE:\n{}".format(self.multibpe))
+        # Load NetTIME
+        self.logger.info("Loading NetTIME checkpoint.")
+        self.load_NetTIME_checkpoint()
+        self.logger.info("NetTIME ARCHITECTURE:\n{}".format(self.nettime))
 
         # Load data
         self.logger.info("Loading data.")
@@ -91,7 +91,7 @@ class CRFTrainWorkflow(object):
             "num_workers": self.num_workers,
             "collate_fn": collate_samples,
         }
-        dset = MultiBPEDataset(
+        dset = NetTIMEDataset(
             self.dataset,
             self.embed_indices,
             self.output_key,
@@ -153,11 +153,11 @@ class CRFTrainWorkflow(object):
         evaluate_worker.start()
         self.logger.info("Training scoring workder started.")
 
-        self.multibpe.eval()
+        self.nettime.eval()
         self.model.train()
         for epoch in range(self.num_epochs):
             for b in range(num_batches):
-                # Generate MultiBPE predictions
+                # Generate NetTIME predictions
                 step, dset = preprocess_queue.get()
                 preprocess_queue.task_done()
                 pred, target = self.generate_predictions(dset)
@@ -187,11 +187,11 @@ class CRFTrainWorkflow(object):
         evaluate_worker.terminate()
 
     def generate_predictions(self, dset):
-        """Generate MultiBPE predictions."""
+        """Generate NetTIME predictions."""
         with torch.no_grad():
             # Make predictions
             feature, target = push_to_device(dset, self.device)
-            predictions = self.softmax(self.multibpe(feature))
+            predictions = self.softmax(self.nettime(feature))
             normalized = self.normalizer.normalize(predictions)
             return normalized, target
 
@@ -351,13 +351,13 @@ class CRFTrainWorkflow(object):
         torch.save(ckpt_params, ckpt_path)
 
     ############################
-    # Load MultiBPE model and checkpoint
+    # Load NetTIME model and checkpoint
     ############################
-    def load_MultiBPE_checkpoint(self):
-        """Load a MultiBPE model and checkpoint params."""
+    def load_NetTIME_checkpoint(self):
+        """Load a NetTIME model and checkpoint params."""
         # Load model
-        if self.multibpe_config is not None:
-            path = self.multibpe_config
+        if self.nettime_config is not None:
+            path = self.nettime_config
         else:
             path = os.path.join(
                 self.model_dir, "{}.config".format(self.experiment_name)
@@ -365,8 +365,8 @@ class CRFTrainWorkflow(object):
         params = torch.load(path, map_location=self.device)
 
         # Initialize model
-        self.multibpe = MultiBPE(params["args"])
-        self.multibpe.to(self.device)
+        self.nettime = NetTIME(params["args"])
+        self.nettime.to(self.device)
 
         # Load model params
         self.ct_feature = params["args"].ct_feature
@@ -374,15 +374,15 @@ class CRFTrainWorkflow(object):
         self.output_size = params["args"].output_size
 
         # Load checkpoint params
-        if self.multibpe_ckpt is not None:
-            if self.multibpe_ckpt.endswith(".json"):
-                ckpt = self.read_ckpt_json(self.multibpe_ckpt)
-            elif self.multibpe_ckpt.endswith(".ckpt"):
-                ckpt = self.multibpe_ckpt
+        if self.nettime_ckpt is not None:
+            if self.nettime_ckpt.endswith(".json"):
+                ckpt = self.read_ckpt_json(self.nettime_ckpt)
+            elif self.nettime_ckpt.endswith(".ckpt"):
+                ckpt = self.nettime_ckpt
             else:
                 raise RuntimeError(
-                    "Invalid extension for MultiBPE checkpoint file "
-                    "{}".format(self.multibpe_ckpt)
+                    "Invalid extension for NetTIME checkpoint file "
+                    "{}".format(self.nettime_ckpt)
                 )
         else:
             path = os.path.join(
@@ -394,7 +394,7 @@ class CRFTrainWorkflow(object):
             ckpt = self.read_ckpt_json(path)
 
         ckpt_params = torch.load(ckpt, map_location=self.device)
-        self.multibpe.load_state_dict(ckpt_params["state_dict"])
+        self.nettime.load_state_dict(ckpt_params["state_dict"])
 
     def read_ckpt_json(self, filename):
         """Load a checkpoint .json file."""

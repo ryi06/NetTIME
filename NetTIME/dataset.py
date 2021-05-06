@@ -10,8 +10,8 @@ from torch.utils.data import Dataset
 from tqdm import tqdm
 
 
-class MultiBPEDataset(Dataset):
-    """Characterizes a MultiBPE Dataset."""
+class NetTIMEDataset(Dataset):
+    """Characterizes a NetTIME Dataset."""
 
     def __init__(
         self,
@@ -228,12 +228,12 @@ class Normalizer(object):
             self.log_weight = self.log_weight.to(device)
 
     def normalize(self, x):
-        """Normalize MultiBPE predictions."""
+        """Normalize NetTIME predictions."""
         return torch.log(x) - self.log_weight
 
 
 class CRFDataset(Dataset):
-    """Characterize a CRF dataset from MultiBPE predictions."""
+    """Characterize a CRF dataset from NetTIME predictions."""
 
     def __init__(
         self, file_path, class_weight, normalizer=None, group_name=None
@@ -307,7 +307,7 @@ class CRFDataset(Dataset):
 
 
 def merge_predictions(prediction_dir, logger, tmp_dir, target_path=None):
-    """Create CRF dataset by merging MultiBPE predictions."""
+    """Create CRF dataset by merging NetTIME predictions."""
     pred_pattern = os.path.join(prediction_dir, "*.npz")
     prediction_files = sorted(glob.glob(pred_pattern))
     num_files = len(prediction_files)

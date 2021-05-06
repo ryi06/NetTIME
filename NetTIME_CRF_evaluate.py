@@ -1,10 +1,10 @@
 import argparse
 
-from MultiBPE import CRFEvaluateWorkflow
+from NetTIME import CRFEvaluateWorkflow
 
 ######## User Input ########
 parser = argparse.ArgumentParser(
-    "Evaluate a linear chain CRF classifier trained on MultiBPE predictions."
+    "Evaluate a linear chain CRF classifier trained on NetTIME predictions."
 )
 
 # Validation parameters
@@ -42,14 +42,14 @@ parser.add_argument(
     "--dataset",
     type=str,
     default="data/datasets/training_example/validation_minOverlap200_maxUnion600_example.h5",
-    help="Path to MultiBPE evaluation data containing target labels. Default: "
+    help="Path to NetTIME evaluation data containing target labels. Default: "
     "data/datasets/training_example/validation_minOverlap200_maxUnion600_example.h5",
 )
 parser.add_argument(
     "--prediction_dir",
     type=str,
     default=None,
-    help="Path to MultiBPE prediction directory.",
+    help="Path to NetTIME prediction directory.",
 )
 parser.add_argument(
     "--dtype",

@@ -3,7 +3,7 @@ from .basic_block import BasicBlock
 
 
 class Encoder(nn.Module):
-    """MultiBPE Decoder"""
+    """NetTIME Decoder"""
 
     def __init__(
         self,

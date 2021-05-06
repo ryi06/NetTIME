@@ -1,5 +1,5 @@
 """
-MultiBPE: A multitask learning model for prediction base-pair resolution
+NetTIME: A multitask learning model for prediction base-pair resolution
 in vivo TF binding predictions using embeddings.
 """
 from .trainer import TrainWorkflow

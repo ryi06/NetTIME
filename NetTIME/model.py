@@ -5,11 +5,11 @@ from .decoder import Decoder
 from .encoder import Encoder
 
 
-class MultiBPE(nn.Module):
-    """MultiBPE model"""
+class NetTIME(nn.Module):
+    """NetTIME model"""
 
     def __init__(self, args):
-        super(MultiBPE, self).__init__()
+        super(NetTIME, self).__init__()
         ######## Configurations ########
         self.fasta_size = 4
         self.num_directions = 2

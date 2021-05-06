@@ -9,17 +9,17 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from .dataset import (
-    MultiBPEDataset,
+    NetTIMEDataset,
     collate_samples,
     get_group_names,
     push_to_device,
 )
-from .model import MultiBPE
+from .model import NetTIME
 from .utils import *
 
 
 class PredictWorkflow(object):
-    """Define the MultiBPE prediction workflow."""
+    """Define the NetTIME prediction workflow."""
 
     def __init__(self):
         self.__MODE = "PREDICT"
@@ -124,7 +124,7 @@ class PredictWorkflow(object):
 
         # Predict
         for group_name in group_names:
-            predict_dset = MultiBPEDataset(
+            predict_dset = NetTIMEDataset(
                 self.dataset,
                 embed_indices,
                 self.output_key,
@@ -270,7 +270,7 @@ class PredictWorkflow(object):
         params = torch.load(path, map_location=self.device)
 
         # Initialize model
-        self.model = MultiBPE(params["args"])
+        self.model = NetTIME(params["args"])
         self.model.to(self.device)
 
         # Load model parameters

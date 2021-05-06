@@ -1,10 +1,10 @@
 import argparse
 
-from MultiBPE import PredictWorkflow
+from NetTIME import PredictWorkflow
 
 ######## User Input ########
 parser = argparse.ArgumentParser(
-    "Make predictions using a MultiBPE model checkpoint."
+    "Make predictions using a NetTIME model checkpoint."
 )
 
 # Prediction parameters

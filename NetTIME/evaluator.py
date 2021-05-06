@@ -8,13 +8,13 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from .calculate_metrics import ScoreTracker, avg_sample_loss
-from .dataset import MultiBPEDataset, collate_samples, push_to_device
-from .model import MultiBPE
+from .dataset import NetTIMEDataset, collate_samples, push_to_device
+from .model import NetTIME
 from .utils import *
 
 
 class EvaluateWorkflow(object):
-    """Define the MultiBPE evaluation workflow."""
+    """Define the NetTIME evaluation workflow."""
 
     def __init__(self):
         self.__MODE = "EVALUATE"
@@ -97,7 +97,7 @@ class EvaluateWorkflow(object):
             "num_workers": self.num_workers,
             "collate_fn": collate_samples,
         }
-        evaluate_dset = MultiBPEDataset(
+        evaluate_dset = NetTIMEDataset(
             self.dataset,
             embed_indices,
             self.output_key,
@@ -288,7 +288,7 @@ class EvaluateWorkflow(object):
         params = torch.load(path, map_location=self.device)
 
         # Initialize model
-        self.model = MultiBPE(params["args"])
+        self.model = NetTIME(params["args"])
         self.model.to(self.device)
 
         # Load model parameters

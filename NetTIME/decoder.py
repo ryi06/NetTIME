@@ -2,7 +2,7 @@ import torch.nn as nn
 
 
 class Decoder(nn.Module):
-    """MultiBPE decoder"""
+    """NetTIME decoder"""
 
     def __init__(
         self,
