@@ -1,8 +1,8 @@
-# Data generation for MultiBPE
+# Data generation for NetTIME
 
-## Generating data to train a MultiBPE model from scratch
-Let's try to generate MultiBPE training data using ChIP-seq data from 5 conditions: [JUN.A549](https://www.encodeproject.org/experiments/ENCSR996DUT/), [JUNB.K562](https://www.encodeproject.org/experiments/ENCSR795IYP/), [JUND.A549](https://www.encodeproject.org/experiments/ENCSR000BRF/), [JUND.GM12878](https://www.encodeproject.org/experiments/ENCSR000DYS/) and [JUND.K562](https://www.encodeproject.org/experiments/ENCSR000EGN/).
-Data generation for training a MultiBPE model requires the following metadata files: 
+## Generating data to train a NetTIME model from scratch
+Let's try to generate NetTIME training data using ChIP-seq data from 5 conditions: [JUN.A549](https://www.encodeproject.org/experiments/ENCSR996DUT/), [JUNB.K562](https://www.encodeproject.org/experiments/ENCSR795IYP/), [JUND.A549](https://www.encodeproject.org/experiments/ENCSR000BRF/), [JUND.GM12878](https://www.encodeproject.org/experiments/ENCSR000DYS/) and [JUND.K562](https://www.encodeproject.org/experiments/ENCSR000EGN/).
+Data generation for training a NetTIME model requires the following metadata files: 
 1. A text file specifying target TF ChIP-seq data locations.
 2. A list of text files specifying locations of feature data files. 
 3. A list of bed files specifying the genomic regions from which to generate train, validation and test examples.
@@ -136,10 +136,10 @@ done
 ## Generating data to make predictions from a trained model
 In this demo, we use the [pretrained model](../pretrained/seq_CT/) to make predictions from 2 conditions: [JUN.K562](https://www.encodeproject.org/experiments/ENCSR000EFS/) and [JUNB.GM12878](https://www.encodeproject.org/experiments/ENCSR897MMC/). This particular model was trained on the DNA sequence as well as 4 types of cell type-specific features (DNase, H3K4me1, H3K4me3, H3K27ac). 
 
-Data generation for MultiBPE prediction requires the following metadata files: 
+Data generation for NetTIME prediction requires the following metadata files: 
 1. A text file specifying the conditions to make predictions for.
 2. A list of text files specifying locations of feature data files. 
-3.  A bed file specifying the genomic regions from which to generate prediction examples.
+3. A bed file specifying the genomic regions from which to generate prediction examples.
 4. A Python pickle file containing the indices for TF and cell type labels.
 
 Example metadata files are provided in `data/metadata/prediction_example`.  The example pickle index file is provided in `data/embeddings`. 
