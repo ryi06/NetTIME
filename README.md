@@ -55,4 +55,3 @@ python NetTIME_CRF_predict.py \
 ## Training a NetTIME model
 
 A tutorial on how to train a NetTIME model using [example training data](data/datasets/training_example/) can be found in [training_example.md](training_example.md).
-

@@ -139,7 +139,7 @@ In this demo, we use the [pretrained model](../pretrained/seq_CT/) to make predi
 Data generation for NetTIME prediction requires the following metadata files: 
 1. A text file specifying the conditions to make predictions for.
 2. A list of text files specifying locations of feature data files. 
-3.  A bed file specifying the genomic regions from which to generate prediction examples.
+3. A bed file specifying the genomic regions from which to generate prediction examples.
 4. A Python pickle file containing the indices for TF and cell type labels.
 
 Example metadata files are provided in `data/metadata/prediction_example`.  The example pickle index file is provided in `data/embeddings`. 
