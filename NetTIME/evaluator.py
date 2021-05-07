@@ -109,7 +109,7 @@ class EvaluateWorkflow(object):
         evaluate_iter = DataLoader(evaluate_dset, **params)
         num_batches = len(evaluate_iter)
         self.logger.info(
-            "{:,} samples used for evaluation.".format(evaluate_iter.__len__())
+            "{:,} samples used for evaluation.".format(evaluate_dset.__len__())
         )
 
         # Initialize data loading worker.
