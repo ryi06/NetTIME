@@ -34,13 +34,7 @@ class NetTIME(nn.Module):
         ## Embeddings ##
         self.ct_embed = nn.Embedding(args.ct_vocab_size, self.embedding_size)
         self.tf_embed = nn.Embedding(args.tf_vocab_size, self.embedding_size)
-        self.fuse_ct = nn.Sequential(
-            nn.Linear(self.embedding_size, self.embedding_size), nn.Tanh()
-        )
-        self.fuse_tf = nn.Sequential(
-            nn.Linear(self.embedding_size, self.embedding_size), nn.Tanh()
-        )
-
+        
         ## Encoder ##
         self.encoder = Encoder(
             self.fasta_size,
