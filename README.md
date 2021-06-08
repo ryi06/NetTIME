@@ -3,15 +3,23 @@
 A multitask learning framework for predicting cell-type specific transcription factor binding sites with base-pair resolution.
 <p align="center"><img width="90%" src="figures/architecture.png" /></p>
 
-<!---
 ## Citation
 If you use NetTIME in your research, please cite:
--->
+```
+@article{yi2021nettime,
+  title={{NetTIME}: Improving Multitask Transcription Factor Binding Site Prediction with Base-pair Resolution},
+  author={Yi, Ren and Cho, Kyunghyun and Bonneau, Richard},
+  journal={bioRxiv},
+  year={2021},
+  publisher={Cold Spring Harbor Laboratory}
+}
+```
+
 
 ## Installation
 
 Run the following commands to clone the repository and install NetTIME:
-```
+```bash
 git clone https://github.com/ryi06/NetTIME.git
 cd NetTIME
 
@@ -26,7 +34,7 @@ Please refer to [Pytorch documentation](https://pytorch.org/) for instructions o
 We use `NetTIME_predict.py` to make predictions from a trained NetTIME model. Our pretrained models can be found [here](pretrained/). We provide an [example prediction dataset](data/datasets/prediction_example/). Check out [this tutorial](preprocess/README.md#generating-data-to-make-predictions-from-a-trained-model) on how to generate dataset like this from a bed file.
 
 Making binding probability predictions for  JUN.K562 and JUNB.GM12878 from a trained NetTIME model can be achieved by running the following. See `NetTIME_predict.py -h` for all available arguments. 
-```
+```bash
 python NetTIME_predict.py \
 --batch_size 2700 \
 --num_workers 10 \
@@ -41,7 +49,7 @@ python NetTIME_predict.py \
 --predict_groups "JUN.K562" "JUNB.GM12878"
 ```
 Binding probability predictions will be saved in `experiments/prediction_example/prediction_predict`. If you wish to further perform binary classification on the predicted binding probabilities using a pretrained conditional random field (CRF) classifier, run `NetTIME_CRF_predict.py` as follows:
-```
+```bash
 python NetTIME_CRF_predict.py \
 --batch_size 2700 \
 --num_workers 10 \
