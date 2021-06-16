@@ -3,15 +3,8 @@ import argparse
 from NetTIME import TrainWorkflow
 
 
-def frac2float(v):
-    res = eval(v)
-    assert isinstance(res, float)
-    return res
-
-
 ######## User Input ########
 parser = argparse.ArgumentParser("Training a NetTIME model.")
-parser.register("type", "frac2float", frac2float)
 
 # Training parameters
 parser.add_argument(
