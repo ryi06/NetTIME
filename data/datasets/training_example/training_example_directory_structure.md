@@ -1,5 +1,5 @@
 ```
-data/datasets/training_example
+data/datasets/training_example/
 |-- test
 |   |-- feature
 |   |   |-- DNase.A549.0.npz
@@ -27,9 +27,8 @@ data/datasets/training_example
 |   |   |-- hocomoco.JUNB.zscore_params.threshold1e-02.npz
 |   |   `-- hocomoco.JUND.zscore_params.threshold1e-02.npz
 |   |-- test_minOverlap200_maxUnion600.bed
-|   |-- test_minOverlap200_maxUnion600_example.bed
-|   |-- test_minOverlap200_maxUnion600_example.fa
-|   `-- test_minOverlap200_maxUnion600_example.pkl
+|   |-- test_minOverlap200_maxUnion600_metadata.pkl
+|   `-- test_minOverlap200_maxUnion600_seq_feature.h5
 |-- training
 |   |-- feature
 |   |   |-- DNase.A549.0.npz
@@ -57,9 +56,8 @@ data/datasets/training_example
 |   |   |-- hocomoco.JUNB.zscore_params.threshold1e-02.npz
 |   |   `-- hocomoco.JUND.zscore_params.threshold1e-02.npz
 |   |-- training_minOverlap200_maxUnion600.bed
-|   |-- training_minOverlap200_maxUnion600_example.bed
-|   |-- training_minOverlap200_maxUnion600_example.fa
-|   `-- training_minOverlap200_maxUnion600_example.pkl
+|   |-- training_minOverlap200_maxUnion600_metadata.pkl
+|   `-- training_minOverlap200_maxUnion600_seq_feature.h5
 |-- validation
 |   |-- feature
 |   |   |-- DNase.A549.0.npz
@@ -87,16 +85,15 @@ data/datasets/training_example
 |   |   |-- hocomoco.JUNB.zscore_params.threshold1e-02.npz
 |   |   `-- hocomoco.JUND.zscore_params.threshold1e-02.npz
 |   |-- validation_minOverlap200_maxUnion600.bed
-|   |-- validation_minOverlap200_maxUnion600_example.bed
-|   |-- validation_minOverlap200_maxUnion600_example.fa
-|   `-- validation_minOverlap200_maxUnion600_example.pkl
-|-- test_minOverlap200_maxUnion600_example.h5
-|-- test_minOverlap200_maxUnion600_example_weight.npy
+|   |-- validation_minOverlap200_maxUnion600_metadata.pkl
+|   `-- validation_minOverlap200_maxUnion600_seq_feature.h5
+|-- test_minOverlap200_maxUnion600.h5
+|-- test_minOverlap200_maxUnion600_weight.npy
 |-- training_example_directory_structure.md
-|-- training_minOverlap200_maxUnion600_example.h5
-|-- training_minOverlap200_maxUnion600_example_weight.npy
-|-- validation_minOverlap200_maxUnion600_example.h5
-`-- validation_minOverlap200_maxUnion600_example_weight.npy
+|-- training_minOverlap200_maxUnion600.h5
+|-- training_minOverlap200_maxUnion600_weight.npy
+|-- validation_minOverlap200_maxUnion600.h5
+`-- validation_minOverlap200_maxUnion600_weight.npy
 
-12 directories, 85 files
+12 directories, 82 files
 ```

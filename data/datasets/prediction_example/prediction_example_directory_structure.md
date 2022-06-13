@@ -18,10 +18,10 @@ data/datasets/prediction_example/
 |   |-- H3K4me1.K562.zscore_params.npz
 |   |-- H3K4me3.GM12878.zscore_params.npz
 |   `-- H3K4me3.K562.zscore_params.npz
-|-- predict_example.bed
-|-- predict_example.fa
-|-- predict_example.h5
-|-- predict_example.pkl
+|-- predict.bed
+|-- predict.h5
+|-- predict_metadata.pkl
+|-- predict_seq_feature.h5
 `-- prediction_example_directory_structure.md
 
 2 directories, 21 files
