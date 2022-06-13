@@ -1,0 +1,4 @@
+TF	cell_type	sample_name
+tf1	ct1	ChIP.tf1.ct1
+tf2	ct1	ChIP.tf2.ct1
+tf3	ct2	ChIP.tf3.ct2

@@ -1,24 +1,7 @@
 import argparse
+import time
 
-from utils import display_args
-
-parser = argparse.ArgumentParser("Merge overlapping peaks in a bed file.")
-
-parser.add_argument("input_bed", type=str, help="Path to input bed file.")
-parser.add_argument("output_bed", type=str, help="Path to output bed file.")
-parser.add_argument(
-    "min_overlap",
-    type=int,
-    help="Minimum overlap between intervals allowed for intervals to be merged.",
-)
-parser.add_argument(
-    "max_union",
-    type=int,
-    help="Maximum interval size allowed for merged intervals.",
-)
-
-args = parser.parse_args()
-display_args(args, __file__)
+import utils
 
 
 ############## FUNCTION ##############
@@ -83,10 +66,36 @@ def generate_bed(merged, output_bed):
 
 
 ############## MAIN ##############
-intervals = generate_intervals(args.input_bed)
-num_intervals = sum([len(intervals[x]) for x in intervals.keys()])
-print("{} peaks before merging".format(num_intervals))
-merged = merge_intervals(intervals, args.min_overlap, args.max_union)
-num_merged = sum([len(merged[x]) for x in merged.keys()])
-print("{} peaks after merging.".format(num_merged))
-generate_bed(merged, args.output_bed)
+def main(input_bed, min_overlap, max_union, output_bed):
+    start_time = time.time()
+    intervals = generate_intervals(input_bed)
+    num_intervals = sum([len(intervals[x]) for x in intervals.keys()])
+    utils.print_time(
+        "{} peaks before merging".format(num_intervals), start_time
+    )
+    merged = merge_intervals(intervals, min_overlap, max_union)
+    num_merged = sum([len(merged[x]) for x in merged.keys()])
+    utils.print_time("{} peaks after merging.".format(num_merged), start_time)
+    generate_bed(merged, output_bed)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser("Merge overlapping peaks in a bed file.")
+
+    parser.add_argument("input_bed", type=str, help="Path to input bed file.")
+    parser.add_argument("output_bed", type=str, help="Path to output bed file.")
+    parser.add_argument(
+        "min_overlap",
+        type=int,
+        help="Minimum overlap between intervals allowed for intervals to be "
+        "merged.",
+    )
+    parser.add_argument(
+        "max_union",
+        type=int,
+        help="Maximum interval size allowed for merged intervals.",
+    )
+
+    args = parser.parse_args()
+    utils.display_args(args, __file__)
+    main(args.input_bed, args.min_overlap, args.max_union, args.output_bed)

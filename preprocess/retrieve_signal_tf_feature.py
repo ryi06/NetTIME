@@ -1,205 +1,206 @@
 import argparse
 import os
 import pickle
-import re
-import subprocess
-import sys
 import time
 
 import numpy as np
 import pandas as pd
+import pyBigWig
 from tqdm import tqdm
 
-from utils import FeatureWriter, SignalNormalizer, print_time, display_args
-
-parser = argparse.ArgumentParser(
-    "Retrieve TF motif enrichment scores for sample sequences."
-)
-
-parser.add_argument("metadata_pkl", type=str, help="Path to example .pkl file.")
-parser.add_argument("fasta_file", type=str, help="Path to example .fa file.")
-parser.add_argument("motif_file", type=str, help="Path to meme motif file.")
-parser.add_argument("assay_type", type=str, help="Assay type.")
-parser.add_argument("tf", type=str, help="Name of the TF.")
-parser.add_argument(
-    "zscore_folder", type=str, help="Output zscore params file path."
-)
-parser.add_argument(
-    "--sequence_length", type=int, default=1000, help="Sample sequence length."
-)
-parser.add_argument(
-    "--batch_size", type=int, default=10000, help="Data file batch size."
-)
-parser.add_argument(
-    "--tmp_dir", type=str, default=".", help="Path to temp directory."
-)
-parser.add_argument(
-    "--threshold", type=float, default=1e-2, help="FIMO p-value threshold"
-)
-
-args = parser.parse_args()
-display_args(args, __file__)
+import utils
 
 
 ############## FUNCTION ##############
-def __fill_array_max_score(arr, fimo, start_id, strand_idx):
-    for _, row in fimo.iterrows():
-        start = row["start"] - start_id
-        stop = row["stop"] - start_id
-        enrichment = row["score"]
-
-        arr[start:stop, strand_idx] = np.maximum(
-            arr[start:stop, strand_idx], enrichment
-        )
-
-
-def generate_motif_enrichment_array(start, fimo_result):
-    enrichment = np.zeros((1000, 2))
-    if fimo_result is None or fimo_result.empty:
-        return enrichment
-    # strands
-    plus_strand = fimo_result[fimo_result["strand"] == "+"]
-    minus_strand = fimo_result[fimo_result["strand"] == "-"]
-
-    __fill_array_max_score(enrichment, plus_strand, start, 0)
-    __fill_array_max_score(enrichment, minus_strand, start, 1)
-
-    return enrichment
-
-
-def get_motif_enrichment(header, sequence, fasta_file, tmp_dir):
-    # create tmp fasta file.
-    with open(fasta_file, "w") as outfasta:
-        outfasta.writelines([header, sequence])
-
-    # Run FIMO.
-    tmp_fimo = os.path.join(tmp_dir, "fimo.tsv")
-    cmd = (
-        "fimo --parse-genomic-coord --skip-matched-sequence --text "
-        "--verbosity 1 --thresh {} {} {} > {}"
-    ).format(args.threshold, args.motif_file, fasta_file, tmp_fimo)
-    subprocess.run(cmd, check=True, shell=True)
-
-    # Return fimo result.
-    try:
-        result = pd.read_csv(
-            tmp_fimo,
-            sep="\t",
-            skipfooter=3,
-            engine="python",
-            dtype={"start": "int64", "stop": "int64"},
-        )
-        return result
-    except pd.errors.EmptyDataError:
-        return
-
-
-def wrapper(fasta_file, seq_dict, tmp_dir, group_name, assay_type):
-    tmp_fasta = os.path.join(tmp_dir, "tmp.fasta")
+def retrieve_signal(
+    enrichment_file,
+    seq_dict,
+    group_name,
+    assay_type,
+    batch_size,
+    threshold,
+    sequence_length,
+    num_features,
+):
+    enrichments = pyBigWig.open(enrichment_file)
     num_samples = len(seq_dict["input"])
-    with open(fasta_file, "r") as fasta:
-        num_lines = len(fasta.read().split("\n")) - 1
-    assert num_samples == round(num_lines / 2)
-    writer = FeatureWriter(
-        args.batch_size,
-        args.sequence_length,
+    writer = utils.FeatureWriter(
+        batch_size,
+        sequence_length,
         num_samples,
         group_name,
         assay_type,
-        num_features=NUM_FEATURES,
+        num_features=num_features,
     )
 
-    with open(fasta_file, "r") as fasta:
-        for k in tqdm(seq_dict["input"].keys()):
-            # Read the next fasta entry.
-            label = fasta.readline()
-            seq = fasta.readline()
+    for k in tqdm(range(len(seq_dict["input"]))):
+        # Initialize signal track.
+        signal = np.zeros((sequence_length, num_features))
 
-            # Assert it's the right sample.
-            _, chrom, start, stop = re.split(">|:|-", label.strip())
-            assert chrom == seq_dict["input"][k]["chrom"]
-            assert int(start) == seq_dict["input"][k]["start"]
-            assert int(stop) == seq_dict["input"][k]["stop"]
+        # Construct BedTool input from sample sequence location.
+        sample = utils.Sample(seq_dict["input"][k])
 
-            # Find sample motif enrichment using FIMO.
-            fimo = get_motif_enrichment(label, seq, tmp_fasta, tmp_dir)
-            enrichment = generate_motif_enrichment_array(int(start), fimo)
+        # Get peaks that overlap with sample.
+        sample_enrichments = enrichments.entries(
+            sample.chrom, sample.start, sample.stop
+        )
 
-            # Write enrichment scores to disk.
-            writer.write_feature(
-                enrichment,
-                k,
-                seq_dict["input"][k][assay_type][group_name],
-                threshold=args.threshold,
-            )
+        if sample_enrichments is not None:
+            sample_enrichments = set(sample_enrichments)
+            for enrich_start, enrich_stop, values in sample_enrichments:
+                s = max(0, enrich_start - sample.start)
+                t = min(sequence_length, enrich_stop - sample.start)
+                
+                pval, _, strand = values.split("\t")
+                assert strand in ["-", "+"]
+                strand_index = 0 if strand == "+" else 1
+
+                # Store max enrichment score.
+                signal[s:t, strand_index] = np.maximum(
+                    signal[s:t, strand_index], 1 - float(pval)
+                )
+
+        # Write enrichment scores to disk.
+        writer.write_feature(
+            signal,
+            k,
+            seq_dict["input"][k][assay_type][group_name],
+            threshold=threshold,
+        )
 
     return writer
 
 
-def merge_signal(writer, seq_length):
-    original = np.empty((writer.counter, seq_length, NUM_FEATURES))
-    original[:] = np.NaN
-    for path in writer.paths:
-        path = path.replace(
-            ".npz", ".threshold{:.0e}.npz".format(args.threshold)
-        )
-        batch = np.load(path)
-        print_time("[{}:{}]".format(batch["start"], batch["stop"]), start_time)
-        original[batch["start"] : batch["stop"]] = batch["original"]
-    return original
+def _add_threshold_to_filename(path, threshold):
+    return path.replace(".npz", ".threshold{:.0e}.npz".format(threshold))
 
 
-def zscore_signal(writer, original, save_params):
-    # Retrieve/generate zscore params
+def get_zscore_params(writer, save_params, threshold, start_time):
     if os.path.isfile(save_params):
         params = np.load(save_params)
-        normalizer = SignalNormalizer(
+        normalizer = utils.SignalNormalizer(
             "zscore", mu=params["mu"], std=params["std"]
         )
     else:
-        mu = np.mean(original)
-        std = np.std(original)
-        normalizer = SignalNormalizer(
+        # Calculate mean.
+        utils.print_time("Calculating sample mean.", start_time)
+        mean_calculator = utils.BatchMeanCalculator()
+        for path in writer.paths:
+            path = _add_threshold_to_filename(path, threshold)
+            batch = np.load(path)["original"]
+            mean_calculator.add_batch_data(batch)
+        mu = mean_calculator.get_mean()
+
+        # Calculate standard deviation.
+        utils.print_time("Calculating sample standard deviation.", start_time)
+        var_calculator = utils.BatchVarianceCalculator(mu)
+        for path in writer.paths:
+            path = _add_threshold_to_filename(path, threshold)
+            batch = np.load(path)["original"]
+            var_calculator.add_batch_data(batch)
+        std = var_calculator.get_standard_deviation()
+
+        normalizer = utils.SignalNormalizer(
             "zscore", save_params=save_params, mu=mu, std=std
         )
-    print_time(
+    utils.print_time(
         "mu={:.4f}, std={:.4f} obtained from {}".format(
             normalizer.mu, normalizer.std, save_params
         ),
         start_time,
     )
-    zscore = normalizer.normalize(original)
+
+    return normalizer
+
+
+def zscore_signal(writer, save_params, threshold, start_time):
+    # Retrieve/generate zscore params.
+    normalizer = get_zscore_params(writer, save_params, threshold, start_time)
 
     # Save zscored signal to disk.
     for path in writer.paths:
-        path = path.replace(
-            ".npz", ".threshold{:.0e}.npz".format(args.threshold)
-        )
+        path = _add_threshold_to_filename(path, threshold)
         batch = dict(np.load(path))
-        batch["zscore"] = zscore[batch["start"] : batch["stop"]]
+        batch["zscore"] = normalizer.normalize(batch["original"])
         np.savez_compressed(path, **batch)
 
 
-############## MAIN ##############
-seq_dict = pickle.load(open(args.metadata_pkl, "rb"))
-start_time = time.time()
-NUM_FEATURES = 2  # Plus and minus strands
+def main(
+    seq_dict,
+    fimo_bigbed,
+    assay_type,
+    tf,
+    zscore_folder,
+    sequence_length,
+    threshold,
+):
+    start_time = time.time()
+    num_features = 2  # Plus and minus strands
+    batch_size = seq_dict["batch_size"]
+    utils.print_time(f"Writing {batch_size} examples per file.", start_time)
 
-print_time("Getting original feature signal", start_time)
-signal_writer = wrapper(
-    args.fasta_file, seq_dict, args.tmp_dir, args.tf, args.assay_type
-)
+    utils.print_time("Getting original feature signal", start_time)
+    signal_writer = retrieve_signal(
+        fimo_bigbed,
+        seq_dict,
+        tf,
+        assay_type,
+        batch_size,
+        threshold,
+        sequence_length,
+        num_features,
+    )
 
-print_time("Merging original data", start_time)
-original_data = merge_signal(signal_writer, args.sequence_length)
+    utils.print_time("Normalizing feature signal", start_time)
+    zscore_file = os.path.join(
+        zscore_folder,
+        "{}.{}.zscore_params.threshold{:.0e}.npz".format(
+            assay_type, tf, threshold
+        ),
+    )
+    zscore_signal(signal_writer, zscore_file, threshold, start_time)
+    utils.print_time("All samples processed!", start_time)
 
-print_time("Normalizing feature signal", start_time)
-zscore_file = os.path.join(
-    args.zscore_folder,
-    "{}.{}.zscore_params.threshold{:.0e}.npz".format(
-        args.assay_type, args.tf, args.threshold
-    ),
-)
-zscore_signal(signal_writer, original_data, zscore_file)
 
-print_time("All samples processed!", start_time)
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(
+        "Retrieve TF motif enrichment scores for sample sequences."
+    )
+
+    parser.add_argument(
+        "metadata_pkl", type=str, help="Path to example .pkl file."
+    )
+    parser.add_argument(
+        "fimo_bigbed",
+        type=str,
+        help="Path to a .bigbed file converted from FIMO result .tsv file.",
+    )
+    parser.add_argument("assay_type", type=str, help="Assay type.")
+    parser.add_argument("tf", type=str, help="Name of the TF.")
+    parser.add_argument(
+        "zscore_folder", type=str, help="Output zscore params file path."
+    )
+    parser.add_argument(
+        "--sequence_length",
+        type=int,
+        default=1000,
+        help="Sample sequence length.",
+    )
+    parser.add_argument(
+        "--threshold", type=float, default=1e-2, help="FIMO p-value threshold"
+    )
+
+    args = parser.parse_args()
+    utils.display_args(args, __file__)
+
+    seq_dict = pickle.load(open(args.metadata_pkl, "rb"))
+    main(
+        seq_dict,
+        args.fimo_bigbed,
+        args.assay_type,
+        args.tf,
+        args.zscore_folder,
+        args.sequence_length,
+        args.threshold,
+    )
