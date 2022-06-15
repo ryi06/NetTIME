@@ -19,6 +19,5 @@ dependencies:
   - tqdm=4.7
   - ucsc-bedgraphtobigwig=357
   - ucsc-bedtobigbed=357
-  - ucsc-bigwigtobedgraph=357
   - pip:
     - pytorch-crf==0.7.2
