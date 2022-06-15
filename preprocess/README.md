@@ -24,7 +24,7 @@ data/embeddings/
 In addition to DNA sequence and cell-type-specific features used to train the main NetTIME model, TF-specific motif features can be optionally added during training. In the following example, we demonstrate the NetTIME data generation procedure using DNase-seq as the cell-type-specific feature and [HOCOMOCO](https://hocomoco11.autosome.org/) TF motif enrichment as the TF-specific features.
 
 Make sure to also download the genome fasta file and chromoeom size file, and save them in `data/annotations`:
-```
+```bash
 mkdir data/annotations
 cd data/annotations/
 wget http://hgdownload.cse.ucsc.edu/goldenpath/hg19/bigZips/latest/hg19.fa.gz
@@ -39,7 +39,7 @@ wget http://hgdownload.cse.ucsc.edu/goldenpath/hg19/bigZips/latest/hg19.chrom.si
 Each interval in the resulting merged peak set is used to create one example sequence of length `SEQUENCE_LENGTH` where the midpoints of the example and the interval are the same.
 
 The above procedure can be achieved by running the following:
-```
+```bash
 cd preprocess
 ./preprocess_v1-1_generate_example_sequences.sh \
 --region_bed ../data/metadata/training_example/training_regions.bed,../data/metadata/training_example/validation_regions.bed,../data/metadata/training_example/test_regions.bed \
@@ -56,7 +56,7 @@ Alternatively, you can provide your own peak set stored in the [bed file format]
 
 ### Step 2: retrieve feature signal tracks and target labels
 For each dataset (training, validation and test), we need to retrieve feature signals (DNase-seq signal and HOCOMOCO motif enrichment) as well as target labels (from conserved and relaxed peak sets). `preprocess_v1-2_retrieve_signal.sh` retrieves necessary data and performs zscore normalization on the retrieved feature signals. For small datasets, we can do this sequentially by running the following: 
-```
+```bash
 declare -a datasets=("training" "validation" "test")
 for dset in "${datasets[@]}"; do
 	EXAMPLE_PICKLE="../data/datasets/training_example/${dset}/${dset}_minOverlap200_maxUnion600_metadata.pkl"
@@ -95,7 +95,7 @@ for dset in "${datasets[@]}"; do
 done
 ```
 I recommend running this step on a high performance computing environment if you have a large number of example sequences and conditions to get data from. For example, if you're working under [Slurm](https://slurm.schedmd.com/), you can submit array jobs similar to this:
-```
+```bash
 declare -a datasets=("training" "validation" "test")
 for dset in "${datasets[@]}"; do
 	EXAMPLE_PICKLE="../data/datasets/training_example/${dset}/${dset}_minOverlap200_maxUnion600_metadata.pkl"
@@ -127,7 +127,7 @@ done
 ``` 
 ### Step 3: Merge data files
 The last step is to combine the retrieved feature signals as well as target labels into one [HDF5 file](https://www.hdfgroup.org/solutions/hdf5/), and compute class weight in target labels. 
-```
+```bash
 declare -a datasets=("training" "validation" "test")
 for dset in "${datasets[@]}"; do
 	EXAMPLE_PICKLE="../data/datasets/training_example/${dset}/${dset}_minOverlap200_maxUnion600_metadata.pkl"
@@ -162,7 +162,7 @@ data/embeddings/
 
 ### Generate example sequences
 Generate example sequences given a peak set bed file. Each interval in the bed file is used to create one example sequence of length `SEQUENCE_LENGTH` where the midpoints of the example and the interval are the same. If intervals in your bed file are much longer than `SEQUENCE_LENGTH`, we recommend binning the intervals before running this script. Turn on the `--skip_target` flag when target labels are not available.
-```
+```bash
 cd preprocess
 ./preprocess_v1-1-2_generate_custom_examples.sh \
 --input_bed ../data/metadata/prediction_example/predict.bed \
@@ -174,7 +174,7 @@ cd preprocess
 
 ### Retrieve feature signal tracks
 Retreive feature signals (DNase-seq, and H3K4me1,H3K4me3 and H3K27ac ChIP-seq) for prediction dataset. Run the following to retrieve data sequentially. See [similar example](#step-2-retrieve-feature-signal-tracks-and-target-labels) above for instructions to retrieve data in a high performance computing environment such as [Slurm](https://slurm.schedmd.com/).
-```
+```bash
 # Process 2nd and 9th entries in ../data/metadata/prediction_example/ct_feature.txt
 for job_id in {2..9}; do
 	./preprocess_v1-2_retrieve_signal.sh --job_id $job_id \
@@ -186,7 +186,7 @@ done
 
 ### Merge data files
 Combine the retrieved feature signals into one [HDF5 file](https://www.hdfgroup.org/solutions/hdf5/). Turn on the `--skip_target` flag when target labels are not available.
-```
+```bash
 ./preprocess_v1-3_merge_dataset.sh \
 --example_pickle "../data/datasets/prediction_example/predict_metadata.pkl" \
 --seq_feature_hdf5 "../data/datasets/prediction_example/predict_seq_feature.h5" \
