@@ -1,0 +1,3 @@
+This directory contains pretrained models used to generate main results shown in the manuscript. Datasets used to train these models can be found [here](../data/datasets/README.md). 
+
+We provide two files for each pretrained model : a `.config` file and a `.ckpt` file. The `.config` file stores the arguments used to train the model (i.e., batch_size, dataset path and learning rate). The `.ckpt` file stores the model parameter weights that achieves the best performance on validation data.

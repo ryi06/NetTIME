@@ -2,7 +2,6 @@ import argparse
 
 from NetTIME import TrainWorkflow
 
-
 ######## User Input ########
 parser = argparse.ArgumentParser("Training a NetTIME model.")
 
@@ -47,7 +46,7 @@ parser.add_argument(
     help="Oprimizer weight decay. Default: 0.0",
 )
 parser.add_argument(
-    "--seed", type=int, default=1111, help="Random seed. Default: 1111"
+    "--seed", type=int, default=None, help="Random seed. Default: None"
 )
 parser.add_argument(
     "--loss_avg_ratio",
@@ -85,9 +84,9 @@ parser.add_argument(
 parser.add_argument(
     "--dataset",
     type=str,
-    default="data/datasets/training_example/training_minOverlap200_maxUnion600_example.h5",
+    default="data/datasets/training_example/training_minOverlap200_maxUnion600.h5",
     help="Path to training data. "
-    "Default: data/datasets/training_example/training_minOverlap200_maxUnion600_example.h5",
+    "Default: data/datasets/training_example/training_minOverlap200_maxUnion600.h5",
 )
 parser.add_argument(
     "--dtype",
@@ -197,7 +196,16 @@ parser.add_argument(
     default=50,
     help="Dimension of the embedding vectors for TFs and cell types. Default: 50",
 )
-
+parser.add_argument(
+    "--disable_tf_embed",
+    action="store_true",
+    help="Do not use TF embedding vectors during training. Default False.",
+)
+parser.add_argument(
+    "--disable_ct_embed",
+    action="store_true",
+    help="Do not use CT embedding vectors during training. Default False.",
+)
 parser.add_argument(
     "--fc_act_fn",
     type=str,
@@ -243,6 +251,7 @@ parser.add_argument(
     default=0.0,
     help="Dropout rate. Default 0.0",
 )
+
 
 args = parser.parse_args()
 

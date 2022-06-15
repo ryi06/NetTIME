@@ -6,6 +6,9 @@ import time
 import numpy as np
 
 
+BUCKET_SIZE = 1000000
+
+
 class Sample(object):
     def __init__(self, sample):
         self.chrom = sample["chrom"]
@@ -163,6 +166,37 @@ class FeatureReader(object):
 		return self.array[metadata['index']]
 
 
+class BatchMeanCalculator(object):
+    def __init__(self):
+        self.running_sum = 0
+        self.num_samples = 0
+        
+    def add_batch_data(self, batch):
+        self.running_sum += batch.sum()
+        self.num_samples += len(batch.flatten())
+
+    def get_mean(self):
+        return self.running_sum / self.num_samples    
+    
+    
+class BatchVarianceCalculator(object):
+    def __init__(self, mu):
+        self.mu = mu
+        self.num_samples = 0
+        self.sum_of_square = 0
+        
+    def add_batch_data(self, batch):
+        batch = batch.flatten()
+        self.num_samples += len(batch)
+        self.sum_of_square += ((batch - self.mu) ** 2).sum()
+        
+    def get_variance(self):
+        return self.sum_of_square / self.num_samples
+    
+    def get_standard_deviation(self):
+        return np.sqrt(self.get_variance())
+
+
 def print_time(msg, start_time):
     elapse = time.strftime(
         "%H:%M:%S", time.gmtime(int((time.time() - start_time)))
@@ -177,3 +211,6 @@ def display_args(args, path):
     print(
         "CONFIG:\n{}".format(json.dumps(vars(args), indent=4, sort_keys=True))
     )
+
+def get_bucket_id(sample_id):
+    return str(int(sample_id // BUCKET_SIZE))

@@ -9,12 +9,8 @@ from torch.utils.data import DataLoader
 from torchcrf import CRF
 from tqdm import tqdm
 
-from .dataset import (
-    CRF_collate_samples,
-    CRF_push_to_device,
-    CRFDataset,
-    merge_predictions,
-)
+from .dataset import (CRF_collate_samples, CRF_push_to_device, CRFDataset,
+                      Normalizer, merge_predictions)
 from .utils import *
 
 
@@ -247,7 +243,7 @@ class CRFPredictWorkflow(object):
             )
         params = torch.load(path, map_location="cpu")
         if self.class_weight is None:
-            self.normalizer = params["normalizer"]
+            self.normalizer = Normalizer(params["class_weight"])
         else:
             self.normalizer = None
 

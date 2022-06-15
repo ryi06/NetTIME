@@ -40,7 +40,13 @@ parser.add_argument(
     help="Specify an alternative path to a best NetTIME checkpoint .ckpt file "
     "or a best NetTIME checkpoint evaluation .json file.",
 )
-
+parser.add_argument(
+    "--start_from_checkpoint",
+    type=str,
+    default=None,
+    help="Path to a pretrained model checkpoint from which to start training. "
+    "Default: None, training starts from scratch.",
+)
 
 parser.add_argument(
     "--learning_rate",
@@ -55,7 +61,7 @@ parser.add_argument(
     help="Oprimizer weight decay. Default: 0.0",
 )
 parser.add_argument(
-    "--seed", type=int, default=1111, help="Random seed. Default: 1111"
+    "--seed", type=int, default=None, help="Random seed. Default: None"
 )
 parser.add_argument(
     "--loss_avg_ratio",
@@ -81,9 +87,9 @@ parser.add_argument(
 parser.add_argument(
     "--class_weight",
     type=str,
-    default="data/datasets/training_example/training_minOverlap200_maxUnion600_example_weight.npy",
+    default=None,
     help="Path to a numpy .npy file specifying the class weight. Default: "
-    "data/datasets/training_example/training_minOverlap200_maxUnion600_example_weight.npy",
+    "None, class_weight will be calculated from target labels prior to training.",
 )
 parser.add_argument(
     "--output_key",
@@ -168,6 +174,7 @@ workflow.num_epochs = args.num_epochs
 workflow.num_workers = args.num_workers
 workflow.nettime_config = args.nettime_config
 workflow.nettime_ckpt = args.nettime_ckpt
+workflow.start_from_checkpoint = args.start_from_checkpoint
 
 workflow.learning_rate = args.learning_rate
 workflow.weight_decay = args.weight_decay

@@ -9,4 +9,12 @@ __pycache__/
 # Data preprocess intermediate files
 data/datasets/training_example/*/
 data/datasets/prediction_example/*/
-data/datasets/prediction_example/*.[bfp]*
+data/datasets/prediction_example/*seq_feature.h5
+data/datasets/prediction_example/*metadata.pkl
+data/datasets/prediction_example/*.bed
+
+# Data annotation files.
+data/annotations
+
+# Large datasets
+data/datasets/seq_CTTF

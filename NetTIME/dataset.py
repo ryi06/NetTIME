@@ -9,6 +9,8 @@ import torch
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
+from preprocess import utils
+
 
 class NetTIMEDataset(Dataset):
     """Characterizes a NetTIME Dataset."""
@@ -27,6 +29,7 @@ class NetTIMEDataset(Dataset):
     ):
         self.__CT_FEATURE_NAME = "ct_feature"
         self.__TF_FEATURE_NAME = "tf_feature"
+        self.__BUCKET_SIZE = utils.BUCKET_SIZE
 
         self.file_path = file_path
         self.embed_indices = embed_indices
@@ -36,7 +39,6 @@ class NetTIMEDataset(Dataset):
         self.tf_feature = tf_feature
         self.exclude_groups = exclude_groups
         self.include_groups = include_groups
-
         self.no_target = no_target
         if self.no_target:
             self.__find_embed_ids()
@@ -63,7 +65,8 @@ class NetTIMEDataset(Dataset):
                 tf, ct = self.__find_embed_labels(ilabel)
 
             # Get feature.
-            input_group = dset["input"][str(int(iid))]
+            bucket = str(int(int(iid) // self.__BUCKET_SIZE))
+            input_group = dset["input"][bucket][str(int(iid))]
             ifeature = torch.from_numpy(input_group["fasta"][:]).float()
             if self.ct_feature:
                 ifeature = self.__add_feature(
@@ -99,9 +102,10 @@ class NetTIMEDataset(Dataset):
 
     def __initialize_output_name_index(self, dset, output_name, path, index):
         """Initialize sample indices for one output_name."""
-        group_names = set()
+        self.group_names = set()
         dset_group = dset[output_name]
         if self.group_name is not None:
+            self.group_names.add(self.group_name)
             self.__add_index(dset_group[self.group_name], path, index)
         else:
             for group_name in dset_group.keys():
@@ -111,11 +115,18 @@ class NetTIMEDataset(Dataset):
                 if self.include_groups is not None:
                     if group_name not in self.include_groups:
                         continue
-                group_names.add(group_name)
+                self.group_names.add(group_name)
                 self.__add_index(dset_group[group_name], path, index)
 
     def __add_index(self, group, path, index):
-        """Add a sample index to index arrays."""
+        """Recursively add a sample index to index arrays."""
+        # Recurse if group is not a dataset.
+        if not isinstance(group, h5py.Dataset):
+            for bucket in range(len(group)):
+                self.__add_index(group[str(bucket)], path, index)
+            return
+
+        # Add dataset paths.
         p = group.name
         for j in range(len(group)):
             path.append(p)
@@ -223,7 +234,16 @@ def get_group_names(
 ##############################
 class Normalizer(object):
     def __init__(self, class_weight, device=None):
-        self.log_weight = torch.from_numpy(np.log(np.load(class_weight)))
+        if isinstance(class_weight, str):
+            self.class_weight = np.load(class_weight)
+        elif isinstance(class_weight, np.ndarray):
+            self.class_weight = class_weight
+        else:
+            raise TypeError(
+                "Expect class_weight to be of type str or np.ndarray, got "
+                f"{type(class_weight)} instead."
+            )
+        self.log_weight = torch.from_numpy(np.log(self.class_weight))
         if device is not None:
             self.log_weight = self.log_weight.to(device)
 
@@ -308,7 +328,7 @@ class CRFDataset(Dataset):
 
 def merge_predictions(prediction_dir, logger, tmp_dir, target_path=None):
     """Create CRF dataset by merging NetTIME predictions."""
-    pred_pattern = os.path.join(prediction_dir, "*.npz")
+    pred_pattern = os.path.join(prediction_dir, "*.h5")
     prediction_files = sorted(glob.glob(pred_pattern))
     num_files = len(prediction_files)
     if num_files == 0:
@@ -317,7 +337,7 @@ def merge_predictions(prediction_dir, logger, tmp_dir, target_path=None):
         )
     else:
         logger.info(
-            "{} prediction files trieved from {}".format(
+            "{} prediction files retrieved from {}".format(
                 num_files, prediction_dir
             )
         )
@@ -333,11 +353,11 @@ def merge_predictions(prediction_dir, logger, tmp_dir, target_path=None):
             target_group = dset.create_group("target")
 
         for file in tqdm(prediction_files):
-            data = np.load(file)
-            group_name = data["group_name"].item()
+            with h5py.File(file, "r") as data:
+                group_name = data.attrs["group_name"]
+                output_key = data.attrs["output_key"]
+                prediction = data["prediction"][:]
             group_names.add(group_name)
-            output_key = data["output_key"]
-            prediction = data["prediction"]
             pred_group.create_dataset(
                 group_name,
                 shape=prediction.shape,
@@ -352,7 +372,10 @@ def merge_predictions(prediction_dir, logger, tmp_dir, target_path=None):
             with h5py.File(target_path, "r") as target_dset:
                 target_list = []
                 for key in output_key:
-                    target_list.append(target_dset[key][group_name][:, :-3])
+                    for bucket in range(len(target_dset[key][group_name])):
+                        target_list.append(
+                            target_dset[key][group_name][str(bucket)][:, :-3]
+                        )
                 target = np.concatenate(target_list)
                 target_group.create_dataset(
                     group_name,

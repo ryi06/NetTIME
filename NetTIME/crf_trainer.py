@@ -9,12 +9,8 @@ from torch.utils.data import DataLoader
 from torchcrf import CRF
 
 from .calculate_metrics import ScoreTracker
-from .dataset import (
-    NetTIMEDataset,
-    Normalizer,
-    collate_samples,
-    push_to_device,
-)
+from .dataset import (NetTIMEDataset, Normalizer, collate_samples,
+                      push_to_device)
 from .model import NetTIME
 from .utils import *
 
@@ -29,6 +25,7 @@ class CRFTrainWorkflow(object):
         self.num_workers = None
         self.nettime_config = None
         self.nettime_ckpt = None
+        self.start_from_checkpoint = None
 
         self.learning_rate = None
         self.weight_decay = None
@@ -56,7 +53,7 @@ class CRFTrainWorkflow(object):
         self.args = None
 
     def run(self):
-        """ Setting up CRF training run. """
+        """Setting up CRF training run."""
         # Initialize model dir and display configurations.
         self.model_dir = init_model_dir(self.output_dir, self.experiment_name)
         self.logger = set_logger(
@@ -67,15 +64,15 @@ class CRFTrainWorkflow(object):
         # Set up GPUs
         if not torch.cuda.is_available():
             raise Exception("No GPU found.")
-        torch.manual_seed(self.seed)
-        torch.cuda.manual_seed_all(self.seed)
+        if self.seed is not None:
+            torch.manual_seed(self.seed)
+            torch.cuda.manual_seed_all(self.seed)
         self.device = torch.device("cuda")
         self.logger.info(
             "Use {} GPU(s) for training".format(torch.cuda.device_count())
         )
 
         # Load NetTIME
-        self.logger.info("Loading NetTIME checkpoint.")
         self.load_NetTIME_checkpoint()
         self.logger.info("NetTIME ARCHITECTURE:\n{}".format(self.nettime))
 
@@ -107,6 +104,15 @@ class CRFTrainWorkflow(object):
 
         # Initialize model
         self.model = CRF(self.output_size, batch_first=True)
+        if self.start_from_checkpoint is not None:
+            self.model = load_pretrained_model(
+                self.model, self.start_from_checkpoint
+            )
+            self.logger.info(
+                "Training from existing model {}".format(
+                    self.start_from_checkpoint
+                )
+            )
         self.model.to(self.device)
         self.logger.info("MODEL ARCHITECTURE:\n{}".format(self.model))
 
@@ -317,7 +323,7 @@ class CRFTrainWorkflow(object):
             "args": self.args,
             "output_size": self.output_size,
             "state_dict": self.model.state_dict(),
-            "normalizer": self.normalizer,
+            "class_weight": self.normalizer.class_weight,
         }
         torch.save(params, path)
         self.logger.info("Model configurations saved in {}".format(path))
@@ -392,7 +398,7 @@ class CRFTrainWorkflow(object):
                 "best_aupr.json",
             )
             ckpt = self.read_ckpt_json(path)
-
+        self.logger.info("Loading NetTIME checkpoint {}".format(ckpt))
         ckpt_params = torch.load(ckpt, map_location=self.device)
         self.nettime.load_state_dict(ckpt_params["state_dict"])
 
