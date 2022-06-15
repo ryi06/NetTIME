@@ -68,8 +68,9 @@ class TrainWorkflow(object):
         # Set up GPUs
         if not torch.cuda.is_available():
             raise Exception("No GPU found.")
-        torch.manual_seed(self.seed)
-        torch.cuda.manual_seed_all(self.seed)
+        if self.seed is not None:
+            torch.manual_seed(self.seed)
+            torch.cuda.manual_seed_all(self.seed)
         self.device = torch.device("cuda")
         self.logger.info(
             "Use {} GPU(s) for training".format(torch.cuda.device_count())

@@ -7,13 +7,10 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
-from .dataset import (
-    NetTIMEDataset,
-    collate_samples,
-    get_group_names,
-    push_to_device,
-)
+from .dataset import (NetTIMEDataset, collate_samples, get_group_names,
+                      push_to_device)
 from .model import NetTIME
 from .utils import *
 
@@ -94,6 +91,7 @@ class PredictWorkflow(object):
         self.time_tracker = TimeTracker()
 
         # Get eligible conditions.
+        self.output_key.sort()
         group_names = get_group_names(
             self.dataset,
             self.output_key,
@@ -137,24 +135,31 @@ class PredictWorkflow(object):
             num_batches = len(predict_iter)
             preprocess_inqueue.put((predict_iter))
 
-            self.display_group(group_name, predict_dset.__len__())
-            self.predict_group(group_name, preprocess_outqueue, num_batches)
+            self.display_group(group_name, predict_dset.dset_length)
+            self.predict_group(
+                group_name,
+                preprocess_outqueue,
+                num_batches,
+                predict_dset.dset_length,
+            )
 
         preprocess_worker.terminate()
 
-    def predict_group(self, group_name, preprocess_queue, num_batches):
+    def predict_group(
+        self, group_name, preprocess_queue, num_batches, num_samples
+    ):
         """Make prediction for one group using a checkpoint."""
         evaluate_queue = mp.JoinableQueue(maxsize=64)
         evaluate_worker = mp.Process(
             name="evaluate_{}".format(group_name),
             target=self.evaluate,
-            args=(group_name, evaluate_queue, num_batches),
+            args=(group_name, evaluate_queue, num_batches, num_samples),
         )
         evaluate_worker.start()
 
         self.model.eval()
         with torch.no_grad():
-            for b in range(num_batches):
+            for b in tqdm(range(num_batches)):
                 dset = preprocess_queue.get()
                 feature, _ = push_to_device(dset, self.device)
                 pred = self.softmax(self.model(feature))
@@ -174,27 +179,32 @@ class PredictWorkflow(object):
                 out_queue.put(dset)
 
     # Evaluate worker
-    def evaluate(self, group_name, queue, num_batches):
+    def evaluate(self, group_name, queue, num_batches, num_samples):
         """Combine predictions and save to disk."""
-        predictions = []
-
-        for batch in range(num_batches):
-            pred = queue.get()
-            queue.task_done()
-            predictions.append(pred)
-
-        predictions = torch.cat(predictions).numpy()
         pred_path = os.path.join(
-            self.pred_path, "{}.{}.npz".format(group_name, self.eval_metric)
+            self.pred_path, "{}.{}.h5".format(group_name, self.eval_metric)
         )
-        np.savez_compressed(
-            pred_path,
-            step=self.step,
-            group_name=group_name,
-            metric=self.eval_metric,
-            prediction=predictions,
-            output_key=self.output_key,
-        )
+        with h5py.File(pred_path, "w") as h5_file:
+            h5_file.attrs.create("step", self.step)
+            h5_file.attrs.create("group_name", group_name)
+            h5_file.attrs.create("metric", self.eval_metric)
+            h5_file.attrs.create("output_key", self.output_key)
+            h5_file.create_dataset(
+                "prediction",
+                (num_samples, 1000, 2),
+                fillvalue=np.nan,
+                compression="gzip",
+            )
+
+            for batch in range(num_batches):
+                pred = queue.get()
+                queue.task_done()
+                # Update predictions.
+                ss = batch * self.batch_size
+                tt = min((batch + 1) * self.batch_size, num_samples)
+                h5_file["prediction"][ss:tt] = pred
+
+        self.logger.info("Prediction saved in {}".format(pred_path))
 
     ############################
     # Display and save predictions

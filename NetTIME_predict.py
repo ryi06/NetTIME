@@ -58,9 +58,9 @@ parser.add_argument(
 parser.add_argument(
     "--dataset",
     type=str,
-    default="data/datasets/training_example/test_minOverlap200_maxUnion600_example.h5",
+    default="data/datasets/training_example/validation_minOverlap200_maxUnion600.h5",
     help="Path to prediction data. Default: "
-    "data/datasets/training_example/test_minOverlap200_maxUnion600_example.h5",
+    "data/datasets/training_example/validation_minOverlap200_maxUnion600.h5",
 )
 parser.add_argument(
     "--dtype",
@@ -126,6 +126,7 @@ parser.add_argument(
     default=None,
     help="Specify an alternative location to save prediction files.",
 )
+
 
 args = parser.parse_args()
 
