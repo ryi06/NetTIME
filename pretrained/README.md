@@ -1,3 +1,12 @@
+# Pretrained models
+
 This directory contains pretrained models used to generate main results shown in the manuscript. Datasets used to train these models can be found [here](../data/datasets/README.md). 
 
-We provide two files for each pretrained model : a `.config` file and a `.ckpt` file. The `.config` file stores the arguments used to train the model (i.e., batch_size, dataset path and learning rate). The `.ckpt` file stores the model parameter weights that achieves the best performance on validation data.
+We provide two files for each pretrained model : a `.config` file and a `.ckpt` file. The `.config` file stores the arguments used to train the model (i.e., batch size, dataset path and learning rate). The `.ckpt` file stores the model parameter weights that achieves the best performance on validation data.
+
+Here is a list of pretrained models and the scenarios they are suitable for making TF binding predictions. All pretrained models can be used as a starting point to fine tune models for new TFs and cell types (by setting `--start_from_checkpoint <pretrained model .ckpt file path>`).
+
+- `seqCT`: this model is trained using DNA sequence data and 4 types of cell-type-specific features (DNase-seq and 3 types of histone ChIP-seq including H3K4me1, H3K4me3, H3K27ac). This is our best-performing model. The model architecture includes both TF- and cell-type-specific embedding vectors (by setting `--disable_tf_embed False --disable_ct_embed False` during training). It is suitable for making predictions in cell types that the model has already seen during training.
+- `seqCT_TFEmbedOnly`: this model is trained using the same set of features as `seqCT`. The model architecture includes TF-specific embedding vector (by setting `--disable_tf_embed False --disable_ct_embed True` during training). In addition to making predictions in cell types that the model has already seen during training, this model can also be used to make predictions in new unseen cell types.
+- `seq`: this model is trained only using DNA sequence data. The model architecture includes both TF- and cell-type-specific embedding vectors. It is suitable for making predictions when TF- and cell-type-specific features are unavailable for the TF-cell-type pair of interest.
+- `seqDNase`: This model is trained using DNA sequence data and DNase-seq cell-type-specific feature. The model architecture includes both TF- and cell-type-specific embedding vectors. It is suitable for making predictions when only DNase-seq data is available to provide cell-type-specific information.

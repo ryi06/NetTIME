@@ -42,8 +42,8 @@ python NetTIME_predict.py \
 --dtype "prediction" \
 --index_file "data/embeddings/pretrained.pkl" \
 --experiment_name "prediction_example" \
---model_config "pretrained/seq_CT/seqCT.config" \
---best_ckpt "pretrained/seq_CT/seqCT_433000.ckpt" \
+--model_config "pretrained/seqCT/seqCT.config" \
+--best_ckpt "pretrained/seqCT/seqCT_433000.ckpt" \
 --eval_metric "aupr" \
 --no_target \
 --predict_groups "JUN.K562" "JUNB.GM12878"
@@ -56,8 +56,8 @@ python NetTIME_CRF_predict.py \
 --prediction_dir "experiments/prediction_example/prediction_predict" \
 --experiment_name "prediction_example" \
 --dtype "prediction" \
---model_config "pretrained/seq_CT/seqCT_crf.config" \
---best_ckpt "pretrained/seq_CT/seqCT_crf_250000.ckpt"
+--model_config "pretrained/seqCT/seqCT_crf.config" \
+--best_ckpt "pretrained/seqCT/seqCT_crf_250000.ckpt"
 ```
 Binary binding classification will be saved in `experiments/prediction_example/prediction_crf_predict`.
 
