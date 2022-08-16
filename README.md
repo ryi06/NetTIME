@@ -1,6 +1,13 @@
 # NetTIME
 
-A multitask learning framework for predicting cell-type specific transcription factor binding sites with base-pair resolution.
+<p align="left">
+    <a href="https://github.com/ryi06/NetTIME/releases">
+        <img alt="GitHub release" src="https://img.shields.io/github/release/ryi06/NetTIME.svg">
+    </a>
+    <a href="https://zenodo.org/badge/latestdoi/357427063"><img src="https://zenodo.org/badge/357427063.svg" alt="DOI"></a>
+</p>
+
+A multitask and base-pair resolution framework for predicting cell-type specific transcription factor binding sites.
 <p align="center"><img width="90%" src="figures/architecture.png" /></p>
 
 ## Citation
