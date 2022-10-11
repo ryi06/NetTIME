@@ -13,12 +13,15 @@ A multitask and base-pair resolution framework for predicting cell-type specific
 ## Citation
 If you use NetTIME in your research, please cite:
 ```
-@article{yi2021nettime,
-  title={{NetTIME}: Improving Multitask Transcription Factor Binding Site Prediction with Base-pair Resolution},
-  author={Yi, Ren and Cho, Kyunghyun and Bonneau, Richard},
-  journal={bioRxiv},
-  year={2021},
-  publisher={Cold Spring Harbor Laboratory}
+@article{yi2022nettime,
+    author = {Yi, Ren and Cho, Kyunghyun and Bonneau, Richard},
+    title = "{NetTIME: a multitask and base-pair resolution framework for improved transcription factor binding site prediction}",
+    journal = {Bioinformatics},
+    year = {2022},
+    month = {08},
+    issn = {1367-4803},
+    doi = {10.1093/bioinformatics/btac569},
+    url = {https://doi.org/10.1093/bioinformatics/btac569},
 }
 ```
 
